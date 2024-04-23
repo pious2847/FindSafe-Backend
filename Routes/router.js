@@ -41,6 +41,13 @@ router.post('/api/mobiledevices', async(req, res)=>{
 
 })
 
+router.post('/register-device/', (req, res) => {
+  const {devicename, devicenumber, }= req.body
 
+
+
+
+
+})
 
 export default router;
