@@ -44,10 +44,32 @@ router.post('/api/mobiledevices', async(req, res)=>{
 })
 
 
-router.post('/register-device/', (req, res) => {
-  const {devicename, devicenumber}= req.body
+router.post('/api/register-device', async (req, res) => {
+try {
+    const {devicename, modelNumber}= req.body
+    let deviceimage = '';
+  
+  const deviceExists = await DevicesInfo.findOne({devicename: devicename})
+  
+ const deciveimgurl = await MobileDevice.findOne({devicename: devicename});
 
+  if (deciveimgurl){
+    deviceimage = deciveimgurl.imageUrl
+  }
 
+  const device = new DevicesInfo({
+    devicename: devicename,
+    modelNumber: modelNumber,
+    image: deviceimage
+  })
+  
+  await device.save();
+
+  res.status(201).json({ message: 'Location added successfully', device: device });
+  
+} catch (error) {
+  res.status(500).json({ error: 'An error occurred: ' + error.message });
+}
 
 
 })
@@ -79,7 +101,7 @@ router.post('/api/register-location/:deviceId/:locationId/:longitude/:latitude',
   deviceExists.locationHistory.push(location);
 
   await location.save();
-  res.status(201).json({ message: 'Location added successfully', device: newDevice });
+  res.status(201).json({ message: 'Location added successfully', device: newDevice });c
 
  } catch (error) {
   res.status(500).json({ error: 'An error occurred: ' + error.message });
