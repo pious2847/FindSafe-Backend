@@ -66,12 +66,17 @@ router.post('/api/register-location/:deviceId/:locationId/:longitude/:latitude',
   const locationExists = await Location.findOne({_id:locationId})
 
   if (locationExists){
-    lo
+    locationExists.latitude = latitude;
+    locationExists.longitude = longitude;
+
+    locationExists.save();
   }
   const location =  new Location({
     latitude: parseFloat(latitude), // Convert latitude to float
     longitude: parseFloat(longitude) // Convert longitude to float
-  })
+  });
+  deviceExists.curretlocation = location._id
+  deviceExists.locationHistory.push(location);
 
   await location.save();
   res.status(201).json({ message: 'Location added successfully', device: newDevice });
