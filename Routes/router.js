@@ -3,6 +3,7 @@ const router = express.Router()
 import MobileDevice from '../models/utils_models/mobile.js'
 import DevicesInfo from '../models/deviceinfo.js'
 import Location from '../models/locations.js'
+import User from '../models/users.js'
 
 
 router.get('/api/mobiledevices', async (req, res) => {
@@ -44,11 +45,19 @@ router.post('/api/mobiledevices', async(req, res)=>{
 })
 
 
-router.post('/api/register-device', async (req, res) => {
+router.post('/api/register-device/:userId', async (req, res) => {
 try {
     const {devicename, modelNumber}= req.body
+    const {userId} = req.params;
+
     let deviceimage = '';
-  
+  console.log('Error occured here' + userId);
+  const user = await User.findById(userId);
+
+  if(!user){
+   return res.status(400).json({ error: 'User not Found, please login' });
+  }
+
   const deviceExists = await DevicesInfo.findOne({devicename: devicename})
   
  const deciveimgurl = await MobileDevice.findOne({devicename: devicename});
@@ -65,6 +74,9 @@ try {
   
   await device.save();
 
+ user.Devices.push(device._id);
+
+ user.save();
   res.status(201).json({ message: 'Location added successfully', device: device });
   
 } catch (error) {
