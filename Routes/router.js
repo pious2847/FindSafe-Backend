@@ -44,7 +44,6 @@ router.post('/api/mobiledevices', async(req, res)=>{
 
 })
 
-
 router.post('/api/register-device/:userId', async (req, res) => {
 try {
     const {devicename, modelNumber}= req.body
