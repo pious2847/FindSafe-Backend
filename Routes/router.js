@@ -1,6 +1,8 @@
 import express from 'express'
 const router = express.Router()
 import MobileDevice from '../models/utils_models/mobile.js'
+import DevicesInfo from '../models/deviceinfo.js'
+import Location from '../models/locations.js'
 
 
 router.get('/api/mobiledevices', async (req, res) => {
@@ -41,12 +43,42 @@ router.post('/api/mobiledevices', async(req, res)=>{
 
 })
 
+
 router.post('/register-device/', (req, res) => {
   const {devicename, devicenumber}= req.body
 
 
 
 
+})
+
+router.post('/api/register-location/:deviceId/:locationId/:longitude/:latitude', async (req, res) =>{
+ try {
+   const {deviceId, locationId,latitude, longitude} = req.params;
+ 
+ 
+  const deviceExists = await DevicesInfo.findOne({_id:deviceId})
+ 
+  if (!deviceExists){
+   return res.status(400).json({ error: 'Device not Found' });
+  }
+  
+  const locationExists = await Location.findOne({_id:locationId})
+
+  if (locationExists){
+    lo
+  }
+  const location =  new Location({
+    latitude: parseFloat(latitude), // Convert latitude to float
+    longitude: parseFloat(longitude) // Convert longitude to float
+  })
+
+  await location.save();
+  res.status(201).json({ message: 'Location added successfully', device: newDevice });
+
+ } catch (error) {
+  res.status(500).json({ error: 'An error occurred: ' + error.message });
+ }
 
 })
 

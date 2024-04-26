@@ -31,4 +31,4 @@ const DevicesInfo = new mongoose.Schema({
 
 const Devices = mongoose.model('devices', DevicesInfo);
 
-module.exports = Devices;
+export default Devices;
