@@ -2,7 +2,8 @@ import express from "express";
 import bcrypt from 'bcrypt'
 import User from "../models/users.js";
 
-import sendResetEmail from '../utils/MailSender.js'
+import { sendResetEmail } from '../utils/MailSender.js';
+
 
 const router = express.Router();
 
