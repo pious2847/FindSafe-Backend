@@ -1,19 +1,21 @@
-import nodemailer from "nodemailer"
-import bcrypt from 'bcrypt'
-import PasswordReset from '../models/utils_models/PasswordReset.js';
-import Users from '../models/users.js';
-
+import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+import PasswordReset from "../models/utils_models/PasswordReset.js";
+import Users from "../models/users.js";
 
 let transporter = nodemailer.createTransport({
   service: "gmail",
-  auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
+  auth: { 
+    user: process.env.AUTH_EMAIL, 
+    pass: process.env.AUTH_PASS
+   },
 });
 
-export const sendResetEmail = async (email, user,  req, res) => {
+export const sendResetEmail = async (email, user, req, res) => {
   if (!user) {
-    req.flash('alertMessage', 'Email not found');
-    req.flash('alertStatus', 'danger');
-    return res.redirect('/forget_password');
+    req.flash("alertMessage", "Email not found");
+    req.flash("alertStatus", "danger");
+    return res.redirect("/forget_password");
   }
 
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
@@ -21,7 +23,7 @@ export const sendResetEmail = async (email, user,  req, res) => {
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
-    subject: 'Password Verification Code',
+    subject: "Password Verification Code",
     html: `
       <div style="background-color: #f0f0f0; padding: 20px;">
         <h2 style="color: #333; font-size: 24px;">Password Verification Code</h2>
@@ -61,7 +63,10 @@ const resetPassword = async (verificationCode, userId, req, res) => {
       return res.redirect("/verify_code");
     }
     console.log(passwordReset);
-    const validPassword = await bcrypt.compare(verificationCode, passwordReset.verificationCode);
+    const validPassword = await bcrypt.compare(
+      verificationCode,
+      passwordReset.verificationCode
+    );
 
     if (!validPassword) {
       req.flash("alertMessage", "Invalid verification code");
@@ -69,8 +74,8 @@ const resetPassword = async (verificationCode, userId, req, res) => {
       return res.redirect("/verify_code");
     }
 
-      // Use the deleteOne method to remove the document
-      await PasswordReset.deleteOne({ _id: passwordReset._id });
+    // Use the deleteOne method to remove the document
+    await PasswordReset.deleteOne({ _id: passwordReset._id });
 
     req.flash("alertMessage", "Email Verification Complete");
     req.flash("alertStatus", "success");
@@ -89,7 +94,7 @@ const updateUserPassword = async (userId, newPassword, req, res) => {
 
     // Check both the Userss and Managers collections for the user with the given ID
     user = await Users.findById(userId); // Check the Userss collection
-    
+
     if (!user) {
       req.flash("alertMessage", "Password Reset Fail User Not Found");
       req.flash("alertStatus", "danger");
@@ -123,7 +128,6 @@ const getUserProfile = async (req, res) => {
     try {
       let user = await Users.findById(userId);
 
-
       if (!user) {
         req.flash("alertMessage", "User not found");
         req.flash("alertStatus", "danger");
@@ -142,12 +146,10 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-
-
-const sendEmail = async (name, email, reciepient,subject, message) => {
+const sendEmail = async (name, email, reciepient, subject, message) => {
   // Replace these with your email service provider's SMTP details
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    service: "gmail",
     auth: {
       user: process.env.AUTH_EMAIL,
       pass: process.env.AUTH_PASS,
@@ -156,7 +158,7 @@ const sendEmail = async (name, email, reciepient,subject, message) => {
 
   const mailOptions = {
     from: email,
-    to: reciepient, 
+    to: reciepient,
     subject: subject,
     html: `
     <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px; font-family: 'Arial', sans-serif; color: #333;">
@@ -178,8 +180,7 @@ const sendEmail = async (name, email, reciepient,subject, message) => {
   }
 };
 
-
-export default  {
+export default {
   // sendResetEmail,
   resetPassword,
   updateUserPassword,
