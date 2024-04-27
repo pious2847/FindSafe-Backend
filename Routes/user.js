@@ -32,10 +32,10 @@ router.post('/api/signup', async (req, res) => {
        password: hashedPassword
       });
   
+      await sendResetEmail(email, user, req, res);
       // Save the new user to the database
       await user.save();
       
-      await sendResetEmail(email, user, req, res);
   
       res.status(201).send('Account created successfully,' + 'Verification Code Sent Successfully');
 

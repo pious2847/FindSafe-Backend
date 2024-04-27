@@ -21,7 +21,7 @@ export const sendResetEmail = async (email, user, req, res) => {
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
 
   const mailOptions = {
-    from: process.env.AUTH_EMAIL,
+    from: 'abdulhafis2847@gmail.com',
     to: email,
     subject: "Password Verification Code",
     html: `
@@ -51,8 +51,8 @@ export const sendResetEmail = async (email, user, req, res) => {
     await transporter.sendMail(mailOptions);
 
   } catch (error) {
-    // throw error;
-    console.log(error.message);
+    throw error;
+    // console.log(error);
   }
 };
 
