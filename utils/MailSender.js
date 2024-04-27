@@ -9,7 +9,7 @@ let transporter = nodemailer.createTransport({
   auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
 });
 
-const sendResetEmail = async (email, user,  req, res) => {
+ const sendResetEmail = async (email, user,  req, res) => {
   if (!user) {
     req.flash('alertMessage', 'Email not found');
     req.flash('alertStatus', 'danger');

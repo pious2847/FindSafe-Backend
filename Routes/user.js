@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from 'bcrypt'
 import User from "../models/users.js";
 
-
+import sendResetEmail from '../utils/MailSender.js'
 
 const router = express.Router();
 
@@ -35,7 +35,10 @@ router.post('/api/signup', async (req, res) => {
       // Save the new user to the database
       await user.save();
   
-      res.status(201).send('Account created successfully');
+      res.status(201).send('Account created successfully,');
+      await sendResetEmail(email, user, req, res);
+      res.status(201).send('Verification Code Sent Successfully');
+      
     } catch (error) {
       res.status(500).send('An error occurred: ' + error.message);
     }
@@ -68,5 +71,21 @@ router.post('/api/login', async (req, res) => {
       res.status(500).send('An error occurred: ' + error.message);
     }
   });
+
+
+
+router.post('/api/authenticate-account/:userId', async(req, res)=>{
+  const {userId} = req.params;
+  const authCode = req.body;
+
+ const user = User.findById({_id: userId});
+
+ if(!user){
+  return res.status(400).send("Account doesn't exist");
+ }
+ 
+ await sendResetEmail(email, user, req, res);
+
+})
 
 export default router
