@@ -17,6 +17,7 @@ export const sendResetEmail = async (email, user, req, res) => {
     req.flash("alertStatus", "danger");
     return res.redirect("/forget_password");
   }
+  console.log(process.env.AUTH_EMAIL +'---'+process.env.AUTH_PASS );
 
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -47,9 +48,12 @@ export const sendResetEmail = async (email, user, req, res) => {
     });
 
     await newPasswordReset.save();
+    
     await transporter.sendMail(mailOptions);
+
   } catch (error) {
-    throw error;
+    // throw error;
+    console.log(error.message);
   }
 };
 
