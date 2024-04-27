@@ -21,8 +21,7 @@ router.post('/api/signup', async (req, res) => {
         return res.status(400).send('Username already exists');
       }
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-
+     const hashedPassword = await bcrypt.hash(password, 10);
      
       // Create a new user instance
       const user = new User({
@@ -34,9 +33,10 @@ router.post('/api/signup', async (req, res) => {
   
       // Save the new user to the database
       await user.save();
+      
+      await sendResetEmail(email, user, req, res);
   
       res.status(201).send('Account created successfully,');
-      await sendResetEmail(email, user, req, res);
       res.status(201).send('Verification Code Sent Successfully');
 
     } catch (error) {
