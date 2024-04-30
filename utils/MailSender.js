@@ -11,7 +11,7 @@ let transporter = nodemailer.createTransport({
    },
 });
 
-export const sendResetEmail = async (email, user, req, res) => {
+ const sendResetEmail = async (email, user, req, res) => {
   if (!user) {
     req.flash("alertMessage", "Email not found");
     req.flash("alertStatus", "danger");
@@ -21,7 +21,7 @@ export const sendResetEmail = async (email, user, req, res) => {
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
 
   const mailOptions = {
-    from: 'abdulhafis2847@gmail.com',
+    from: process.env.AUTH_EMAIL,
     to: email,
     subject: "Password Verification Code",
     html: `
@@ -150,7 +150,7 @@ const getUserProfile = async (req, res) => {
 };
 
 const sendEmail = async (name, email, reciepient, subject, message) => {
-  // Replace these with your email service provider's SMTP details
+
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -183,8 +183,8 @@ const sendEmail = async (name, email, reciepient, subject, message) => {
   }
 };
 
-export default {
-  // sendResetEmail,
+export  {
+  sendResetEmail,
   resetPassword,
   updateUserPassword,
   getUserProfile,
