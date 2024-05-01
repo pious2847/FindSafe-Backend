@@ -12,6 +12,8 @@ router.get('/api/mobiledevices', async (req, res) => {
       const mobileDevices = await MobileDevice.find();
   
       res.status(200).json({ mobileDevices });
+
+      console.log(mobileDevices);
     } catch (error) {
       res.status(500).json({ error: 'An error occurred: ' + error.message });
     }

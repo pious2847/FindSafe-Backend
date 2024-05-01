@@ -13,7 +13,7 @@ router.get('/', (req, res)=>{
 
 router.post('/api/signup', async (req, res) => {
     try {
-      const { name,phone,email,  password } = req.body;
+      const { username,email,  password } = req.body;
   
       // Check if user with the same name already exists
       const userExists = await User.findOne({ email });
@@ -26,18 +26,17 @@ router.post('/api/signup', async (req, res) => {
      
       // Create a new user instance
       const user = new User({
-       name: name,
-       phone: phone,
+       name: username,
        email: email,
        password: hashedPassword
       });
   
-      await sendResetEmail(email, user, req, res);
+      // await sendResetEmail(email, user, req, res);
       // Save the new user to the database
       await user.save();
       
   
-      res.status(201).send('Account created successfully,' + 'Verification Code Sent Successfully');
+      res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
 
     } catch (error) {
       res.status(500).send('An error occurred: ' + error.message);
@@ -65,8 +64,10 @@ router.post('/api/login', async (req, res) => {
       // Set session variables
       req.session.userId = user._id;
       req.session.isLoggedIn = true;
+      let userId = user._id
   
-      res.status(200).send('Login successful');
+      res.status(200).send(userId);
+
     } catch (error) {
       res.status(500).send('An error occurred: ' + error.message);
     }
