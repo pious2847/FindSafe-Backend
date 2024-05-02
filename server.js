@@ -56,12 +56,13 @@ app.use(router)
 
 // Function to handle server and database connections
 async function startServer() {
+  const PORT  = process.env.PORT || 8080;
     try {
     //  connection established and connected to database
-         await ConnectDB();
+         ConnectDB();
 
       // Start the Express server
-      app.listen(process.env.PORT || 8080,  () => {
+      app.listen(PORT,  () => {
         console.log(`---- Server is running on  ${process.env.PORT } ----`);
       });
       
