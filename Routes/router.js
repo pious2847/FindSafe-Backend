@@ -18,6 +18,21 @@ router.get('/api/mobiledevices', async (req, res) => {
       res.status(500).json({ error: 'An error occurred: ' + error.message });
     }
   });
+  router.get('/api/mobiledevices/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      // Find all mobile devices
+      console.log(userId);
+      const mobileDevices = await DevicesInfo.find({ user: userId });
+  
+      console.log(mobileDevices);
+      res.status(200).json({ mobileDevices });
+
+    } catch (error) {
+      res.status(500).json({ error: 'An error occurred: ' + error.message });
+    }
+  });
+
 
 router.post('/api/mobiledevices', async(req, res)=>{
     try {
@@ -46,12 +61,11 @@ router.post('/api/mobiledevices', async(req, res)=>{
 
 })
 
-router.post('/api/register-device/:userId', async (req, res) => {
+router.post('/api/register-device/:userId/:devicename/:modelNumber', async (req, res) => {
 try {
-    const {devicename, modelNumber}= req.body
-    const {userId} = req.params;
+    const {userId,devicename, modelNumber} = req.params;
 
-    let deviceimage = '';
+  let deviceimage = '';
   console.log('Error occured here' + userId);
   const user = await User.findById(userId);
 
@@ -66,8 +80,12 @@ try {
   if (deciveimgurl){
     deviceimage = deciveimgurl.imageUrl
   }
+  if (!deciveimgurl){
+    deviceimage = 'https://static.vecteezy.com/system/resources/previews/002/249/888/large_2x/illustration-of-phone-screen-icon-free-vector.jpg'
+  }
 
   const device = new DevicesInfo({
+    user: userId,
     devicename: devicename,
     modelNumber: modelNumber,
     image: deviceimage
@@ -78,7 +96,7 @@ try {
  user.Devices.push(device._id);
 
  user.save();
-  res.status(201).json({ message: 'Location added successfully', device: device });
+  res.status(200).json({ message: 'Location added successfully', device: device });
   
 } catch (error) {
   res.status(500).json({ error: 'An error occurred: ' + error.message });

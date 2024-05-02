@@ -2,6 +2,10 @@ import { name } from "ejs";
 import mongoose from "mongoose";
 
 const DevicesInfo = new mongoose.Schema({
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user'
+    },
     devicename: {
         type: String,
         trim: true,
