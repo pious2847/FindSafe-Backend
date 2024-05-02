@@ -4,12 +4,15 @@ import PasswordReset from "../models/utils_models/PasswordReset.js";
 import Users from "../models/users.js";
 
 let transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // true for 465, false for other ports
   service: "gmail",
   auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
 });
 
 
-const sendResetEmail = async (email, user,  req, res) => {
+const sendResetEmail = async (email, user,  _req, res) => {
   if (!user) {
     return res.status(400).send('Account not found');
   }
@@ -44,7 +47,9 @@ const sendResetEmail = async (email, user,  req, res) => {
 
     await newPasswordReset.save();
     await transporter.sendMail(mailOptions);
+
   } catch (error) {
+    console.log(error.message);
     throw error;
   }
 };
