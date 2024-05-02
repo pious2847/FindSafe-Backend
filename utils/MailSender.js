@@ -5,17 +5,13 @@ import Users from "../models/users.js";
 
 let transporter = nodemailer.createTransport({
   service: "gmail",
-  auth: { 
-    user: process.env.AUTH_EMAIL, 
-    pass: process.env.AUTH_PASS
-   },
+  auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
 });
 
- const sendResetEmail = async (email, user, req, res) => {
+
+const sendResetEmail = async (email, user,  req, res) => {
   if (!user) {
-    req.flash("alertMessage", "Email not found");
-    req.flash("alertStatus", "danger");
-    return res.redirect("/forget_password");
+    return res.status(400).send('Account not found');
   }
 
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
@@ -23,7 +19,7 @@ let transporter = nodemailer.createTransport({
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
-    subject: "Password Verification Code",
+    subject: 'Password Verification Code',
     html: `
       <div style="background-color: #f0f0f0; padding: 20px;">
         <h2 style="color: #333; font-size: 24px;">Password Verification Code</h2>
@@ -47,14 +43,12 @@ let transporter = nodemailer.createTransport({
     });
 
     await newPasswordReset.save();
-
     await transporter.sendMail(mailOptions);
-
   } catch (error) {
     throw error;
-    // console.log(error);
   }
 };
+
 
 const resetPassword = async (verificationCode, userId, req, res) => {
   try {
