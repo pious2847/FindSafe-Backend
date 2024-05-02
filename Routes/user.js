@@ -36,10 +36,8 @@ router.post('/api/signup', async (req, res) => {
 
       const newuser = await User.findOne({ email })
 
-      console.log(user._id);
-      console.log(newuser._id);
       
-      await sendResetEmail(email, newuser, req, res);
+      await sendResetEmail(email, user, req, res);
   
       res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
 
