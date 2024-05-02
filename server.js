@@ -21,6 +21,7 @@ const app = express();
 // dotenv
 config();
 
+const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
 
 // Use MongoStore as session store
 app.use(session({
@@ -28,7 +29,7 @@ app.use(session({
   resave: true,
   saveUninitialized: true,
   store: MongoStore.create({
-    mongoUrl: process.env.DBConnectionLink
+    mongoUrl: sessionConnectionUri
   })
 }));
 
