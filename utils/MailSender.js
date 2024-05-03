@@ -6,7 +6,7 @@ import Users from "../models/users.js";
 let transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // true for 465, false for other ports
+  secure: true, // true for 465, false for other ports
   service: "gmail",
   auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
 });
@@ -46,7 +46,13 @@ const sendResetEmail = async (email, user,  _req, res) => {
     });
 
     await newPasswordReset.save();
-    await transporter.sendMail(mailOptions);
+     transporter.sendMail(mailOptions, (error, info)=>{
+      if(error){
+        console.log(error);
+      }else{
+        console.log("Email has been sent Sucessfully" + info.response)
+      }
+    });
 
   } catch (error) {
     console.log(error.message);

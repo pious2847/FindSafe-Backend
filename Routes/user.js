@@ -31,7 +31,7 @@ router.post('/api/signup', async (req, res) => {
        password: hashedPassword
       });
   // send verified codes for user
-      // await sendResetEmail(email, user, req, res);
+      await sendResetEmail(email, user, req, res);
 
       // Save the new user to the database
       await user.save();
