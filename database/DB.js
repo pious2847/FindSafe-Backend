@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 
+
+
 const ConnectDB =  ()=>{
   const atlasConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
 

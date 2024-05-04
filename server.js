@@ -1,13 +1,12 @@
 // default import
 import express from 'express';
-import { config } from 'dotenv';
+import dotenv from 'dotenv'
 import  morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import session from 'express-session';
 import bodyParser from 'body-parser';
 import MongoStore from 'connect-mongo'
 import cors from 'cors';
-
 
 
 
@@ -19,7 +18,8 @@ import router from './Routes/router.js';
 const app = express();
 
 // dotenv
-config();
+dotenv.config();
+
 
 const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
 

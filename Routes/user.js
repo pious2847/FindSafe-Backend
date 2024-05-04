@@ -37,6 +37,7 @@ router.post('/api/signup', async (req, res) => {
         // Save the new user to the database
       await user.save();
       res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
+      console.log(emailsend);
       }
       
     } catch (error) {
