@@ -5,11 +5,9 @@ import Users from "../models/users.js";
 import dotenv from 'dotenv'
 
 
-// const { AUTH_EMAIL, AUTH_PASS } = process.env;
 
 dotenv.config();
 
-console.log(process.env.AUTH_EMAIL, ' pass ', process.env.AUTH_PASS);
 
 const transporter =  nodemailer.createTransport({
   service: "gmail",

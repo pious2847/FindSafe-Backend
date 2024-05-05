@@ -62,8 +62,13 @@ async function startServer() {
          ConnectDB();
 
       // Start the Express server
-      app.listen(PORT,  () => {
-        console.log(`---- Server is running on  ${process.env.PORT } ----`);
+      app.listen(PORT,  (error) => {
+        if (error) {
+          console.log(error)
+      }
+      else {
+          console.log(`----Server running on  http://localhost:${port} ----`)
+      }
       });
       
     } catch (err) {
