@@ -60,14 +60,14 @@ async function startServer() {
     try {
     //  connection established and connected to database
          ConnectDB();
-
+        console.log(process.env.IP);
       // Start the Express server
-      app.listen(PORT,  (error) => {
+      app.listen(PORT, process.env.IP, (error) => {
         if (error) {
           console.log(error)
       }
       else {
-          console.log(`----Server running on  http://localhost:${port} ----`)
+          console.log(`----Server running on  http://localhost:${PORT} ----`)
       }
       });
       

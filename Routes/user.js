@@ -37,7 +37,7 @@ router.post('/api/signup', async (req, res) => {
         // Save the new user to the database
       await user.save();
       res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
-      console.log(emailsend);
+      console.log( "Email sent Successfully ",emailsend);
       }
       
     } catch (error) {
@@ -52,6 +52,7 @@ router.post('/api/login', async (req, res) => {
       // Find user by email
       const user = await User.findOne({ email });
   
+        console.log(user)
       if (!user) {
         return res.status(400).send("Account doesn't exist");
       }

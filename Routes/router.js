@@ -18,7 +18,8 @@ router.get('/api/mobiledevices', async (req, res) => {
       res.status(500).json({ error: 'An error occurred: ' + error.message });
     }
   });
-  router.get('/api/mobiledevices/:userId', async (req, res) => {
+  
+router.get('/api/mobiledevices/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
       // Find all mobile devices
