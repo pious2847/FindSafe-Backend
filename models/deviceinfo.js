@@ -11,6 +11,11 @@ const DevicesInfo = new mongoose.Schema({
         trim: true,
         require: true
     },
+    mode:{
+        type: String,
+        trim: true,
+        default: 'active',
+    },
     modelNumber:{
      type: String,
      trim: true

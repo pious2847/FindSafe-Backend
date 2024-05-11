@@ -17,8 +17,8 @@ router.get('/api/mobiledevices', async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: 'An error occurred: ' + error.message });
     }
-  });
-  
+});
+
 router.get('/api/mobiledevices/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
@@ -32,9 +32,30 @@ router.get('/api/mobiledevices/:userId', async (req, res) => {
     } catch (error) {
       res.status(500).json({ error: 'An error occurred: ' + error.message });
     }
-  });
+});
 
-
+router.post('/api/devicemode/:userId', async (req, res) => {
+    const { userId } = req.params;
+    const { mode } = req.body;
+    try {
+      console.log(userId);
+      const mobileDevices = await DevicesInfo.findOne({ user: userId });
+      console.log(mobileDevices);
+  
+      if (!mobileDevices) {
+        return res.status(404).json({ message: "No devices found" });
+      }
+  
+      mobileDevices.mode = mode;
+      await mobileDevices.save(); // Use await since save() is an async operation
+  
+      return res.status(200).json({ message: "Lost mode activated successfully" });
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ error: 'An error occurred: ' + error.message });
+    }
+});
+  
 router.post('/api/mobiledevices', async(req, res)=>{
     try {
         const { devicename, imageUrl } = req.body;
@@ -55,7 +76,7 @@ router.post('/api/mobiledevices', async(req, res)=>{
         // Save the new device entry
         await newDevice.save();
     
-        res.status(201).json({ message: 'Device added successfully', device: newDevice });
+        res.status(200).json({ message: 'Device added successfully', device: newDevice });
       } catch (error) {
         res.status(500).json({ error: 'An error occurred: ' + error.message });
       }
@@ -97,7 +118,8 @@ try {
  user.Devices.push(device._id);
 
  user.save();
-  res.status(200).json({ message: 'Location added successfully', device: device });
+
+  res.status(200).json({ message: 'Location added successfully', deviceId: device._id });
   
 } catch (error) {
   res.status(500).json({ error: 'An error occurred: ' + error.message });
