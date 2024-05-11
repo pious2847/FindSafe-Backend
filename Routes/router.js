@@ -15,7 +15,7 @@ router.get('/api/mobiledevices', async (req, res) => {
 
       console.log(mobileDevices);
     } catch (error) {
-      res.status(500).json({ error: 'An error occurred: ' + error.message });
+      res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
 
@@ -30,7 +30,7 @@ router.get('/api/mobiledevices/:userId', async (req, res) => {
       res.status(200).json({ mobileDevices });
 
     } catch (error) {
-      res.status(500).json({ error: 'An error occurred: ' + error.message });
+      res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
 
@@ -62,7 +62,7 @@ router.post('/api/devicemode/:userId/:deviceId', async (req, res) => {
       }
     } catch (error) {
       console.log(error);
-      return res.status(500).json({ error: 'An error occurred: ' + error.message });
+      return res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
   
@@ -88,7 +88,7 @@ router.post('/api/mobiledevices', async(req, res)=>{
     
         res.status(200).json({ message: 'Device added successfully', device: newDevice });
       } catch (error) {
-        res.status(500).json({ error: 'An error occurred: ' + error.message });
+        res.status(500).json({ message: 'An error occurred: ' + error.message });
       }
 
 })
@@ -102,7 +102,7 @@ try {
   const user = await User.findById(userId);
 
   if(!user){
-   return res.status(400).json({ error: 'User not Found, please login' });
+   return res.status(400).json({ message: 'User not Found, please login' });
   }
 
   const deviceExists = await DevicesInfo.findOne({devicename: devicename})
@@ -168,7 +168,7 @@ router.post('/api/register-location/:deviceId/:locationId/:longitude/:latitude',
   res.status(201).json({ message: 'Location added successfully', device: newDevice });c
 
  } catch (error) {
-  res.status(500).json({ error: 'An error occurred: ' + error.message });
+  res.status(500).json({ message: 'An error occurred: ' + error.message });
  }
 
 })
