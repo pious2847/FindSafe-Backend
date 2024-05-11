@@ -34,22 +34,32 @@ router.get('/api/mobiledevices/:userId', async (req, res) => {
     }
 });
 
-router.post('/api/devicemode/:userId', async (req, res) => {
-    const { userId } = req.params;
+router.post('/api/devicemode/:userId/:deviceId', async (req, res) => {
+    const { userId, deviceId } = req.params;
     const { mode } = req.body;
     try {
+
+      const user = await User.findOne({_id: userId})
+      if(!user){
+        return res.status(404).json({ message: "User not found" });
+      }
       console.log(userId);
-      const mobileDevices = await DevicesInfo.findOne({ user: userId });
+
+      const mobileDevices = await DevicesInfo.findOne({ _id: deviceId });
       console.log(mobileDevices);
   
       if (!mobileDevices) {
         return res.status(404).json({ message: "No devices found" });
       }
-  
       mobileDevices.mode = mode;
       await mobileDevices.save(); // Use await since save() is an async operation
-  
-      return res.status(200).json({ message: "Lost mode activated successfully" });
+      
+      if(mode === 'active'){
+      return res.status(200).json({ message: "Active mode activated successfully" });
+      }
+      else{
+        return res.status(200).json({ message: "Lost mode activated successfully" });
+      }
     } catch (error) {
       console.log(error);
       return res.status(500).json({ error: 'An error occurred: ' + error.message });
