@@ -16,6 +16,11 @@ const DevicesInfo = new mongoose.Schema({
         trim: true,
         default: 'active',
     },
+    activationCode:{
+        type: String,
+        trim: true,
+        default: ' ',
+    },
     modelNumber:{
      type: String,
      trim: true

@@ -33,6 +33,29 @@ router.get('/api/mobiledevices/:userId', async (req, res) => {
       res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
+// GET /api/devices/:deviceId/mode
+router.get('/api/devices/:deviceId/mode', async (req, res) => {
+  try {
+    const device = await DevicesInfo.findById(req.params.deviceId)
+      .select('mode activationCode devicename modelNumber')
+      .populate('user', 'name email');
+
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
+
+    res.json({
+      mode: device.mode,
+      activationCode: device.activationCode,
+      deviceName: device.devicename,
+      modelNumber: device.modelNumber,
+      user: device.user
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 router.post('/api/devicemode/:userId/:deviceId', async (req, res) => {
     const { userId, deviceId } = req.params;
@@ -207,7 +230,7 @@ router.post('/api/update-location', async (req, res) => {
     const { deviceId, latitude, longitude } = req.body;
 
     // Find the device by its ID
-    const device = await DevicesInfo.findById(deviceId).populate('curretlocation');
+    const device = await DevicesInfo.findById(deviceId);
 
     if (!device) {
       return res.status(404).json({ error: 'Device not found' });
@@ -228,5 +251,26 @@ router.post('/api/update-location', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+router.post('/api/:deviceId/validate-activation-code', (req, res)=>{
+  const {deviceId} = req.params.deviceId;
+  const {activationCode} = req.body;
+
+ try {
+   const Device = DevicesInfo.findById(deviceId);
+   
+   if (!Device) {
+     res.status(404).json({error: 'Device not found'});
+   }
+   if (activationCode === Device.activationCode){
+     res.status(200).json({message: 'Activation completed sucessfully', isValid: true})
+   }else{
+    res.status(400).json({message: 'Invalid Activation code', isValid: false})
+
+   }
+ } catch (error) {
+  res.status(500).json({message: `Internal sever Error ${error}`, isValid: false});
+ }
+})
 
 export default router;
