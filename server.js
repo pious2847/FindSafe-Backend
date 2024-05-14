@@ -8,19 +8,12 @@ const bodyParser = require('body-parser');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
 
-// custom imports
-const ConnectDB = require('./database/DB');
-const userRouter = require('./Routes/user');
-const router = require('./Routes/router');
-
-
 const app = express();
 
 
-
+// Use MongoStore as session store
 const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
 
-// Use MongoStore as session store
 app.use(session({
   secret: 'Secret_Key',
   resave: true,
@@ -29,7 +22,6 @@ app.use(session({
     mongoUrl: sessionConnectionUri
   })
 }));
-
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -43,7 +35,21 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
+// custom imports
+const ConnectDB = require('./database/DB');
+const userRouter = require('./Routes/user');
+const router = require('./Routes/router');
 
+
+// measuring the sped of site load
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+      const duration = Date.now() - start;
+      console.log(`${req.method} ${req.path} took ${duration}ms`);
+  });
+  next();
+});
 
 // settings for using routes
 app.use(userRouter)
