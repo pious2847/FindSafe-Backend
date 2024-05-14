@@ -1,9 +1,9 @@
-import express from 'express'
+const express = require('express')
 const router = express.Router()
-import MobileDevice from '../models/utils_models/mobile.js'
-import DevicesInfo from '../models/deviceinfo.js'
-import Location from '../models/locations.js'
-import User from '../models/users.js'
+const MobileDevice = require('../models/utils_models/mobile')
+const DevicesInfo = require('../models/deviceinfo')
+const Location = require('../models/locations')
+const User = require('../models/users')
 
 
 router.get('/api/mobiledevices', async (req, res) => {
@@ -273,4 +273,4 @@ router.post('/api/:deviceId/validate-activation-code', (req, res)=>{
  }
 })
 
-export default router;
+module.exports = router;

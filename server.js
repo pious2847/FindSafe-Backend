@@ -1,19 +1,18 @@
 // default import
-import express from 'express';
-import dotenv from 'dotenv'
-import  morgan from 'morgan';
-import cookieParser from 'cookie-parser';
-import session from 'express-session';
-import bodyParser from 'body-parser';
-import MongoStore from 'connect-mongo'
-import cors from 'cors';
-
-
+const express = require('express');
+ require('dotenv').config();
+const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const bodyParser = require('body-parser');
+const MongoStore = require('connect-mongo');
+const cors = require('cors');
 
 // custom imports
-import ConnectDB from './database/DB.js'
-import userRouter from './Routes/user.js'
-import router from './Routes/router.js';
+const ConnectDB = require('./database/DB');
+const userRouter = require('./Routes/user');
+const router = require('./Routes/router');
+
 
 const app = express();
 

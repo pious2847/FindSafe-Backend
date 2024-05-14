@@ -1,8 +1,8 @@
-import express from "express";
-import bcrypt from 'bcrypt'
-import User from "../models/users.js";
+const express = require("express");
+const bcrypt  = require
+const User  = require("../models/users.js");
 
-import { sendResetEmail } from '../utils/MailSender.js';
+const { sendResetEmail } =  require('../utils/MailSender');
 
 
 const router = express.Router();
@@ -96,4 +96,4 @@ try {
 }
 })
 
-export default router
+module.exports = router

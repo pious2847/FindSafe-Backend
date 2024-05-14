@@ -1,5 +1,4 @@
-import { name } from "ejs";
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const DevicesInfo = new mongoose.Schema({
     user: {
@@ -44,4 +43,4 @@ const DevicesInfo = new mongoose.Schema({
 
 const Devices = mongoose.model('devices', DevicesInfo);
 
-export default Devices;
+module.exports = Devices;

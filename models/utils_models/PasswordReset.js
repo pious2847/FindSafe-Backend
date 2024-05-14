@@ -1,4 +1,4 @@
-import mongoose  from 'mongoose';
+const mongoose = require("mongoose");
 
 const PasswordResetSchema = new mongoose.Schema({
   userId: String,
@@ -8,4 +8,5 @@ const PasswordResetSchema = new mongoose.Schema({
 });
 
 const PasswordReset = mongoose.model("PasswordReset", PasswordResetSchema);
-export default  PasswordReset;
+
+module.exports =  PasswordReset;

@@ -1,12 +1,7 @@
-import nodemailer from "nodemailer";
-import bcrypt from "bcrypt";
-import PasswordReset from "../models/utils_models/PasswordReset.js";
-import Users from "../models/users.js";
-import dotenv from 'dotenv'
-
-
-
-dotenv.config();
+const nodemailer = require("nodemailer");
+const bcrypt = require("bcrypt");
+const PasswordReset = require("../models/utils_models/PasswordReset.js");
+const Users = require("../models/users.js");
 
 
 const transporter =  nodemailer.createTransport({
@@ -199,7 +194,7 @@ const sendEmail = async (name, email, reciepient, subject, message) => {
   }
 };
 
-export  {
+module.exports =  {
   sendResetEmail,
   resetPassword,
   updateUserPassword,
