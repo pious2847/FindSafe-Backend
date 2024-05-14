@@ -16,8 +16,6 @@ const router = require('./Routes/router');
 
 const app = express();
 
-// dotenv
-dotenv.config();
 
 
 const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'

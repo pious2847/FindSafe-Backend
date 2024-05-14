@@ -16,4 +16,4 @@ const ConnectDB =  ()=>{
     }
  }
 
- export default ConnectDB;
+module.exports = ConnectDB;
