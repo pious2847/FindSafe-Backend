@@ -1,21 +1,22 @@
+// user.js
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
   name: {
     type: String,
     trim: true,
-    require: true,
+    required: true,
   },
   phone: {
     type: String,
     trim: true,
-    require: true,
+    required: true,
   },
   email: {
     type: String,
     trim: true,
     unique: true,
-    require: true,
+    required: true,
   },
   verified: {
     type: Boolean,
@@ -26,15 +27,14 @@ const UserSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
-
-  Devices: [
+  devices: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "devices",
+      ref: "Device",
     },
   ],
 });
 
-const User = mongoose.model("user", UserSchema);
+const User = mongoose.model("User", UserSchema);
 
 module.exports = User;

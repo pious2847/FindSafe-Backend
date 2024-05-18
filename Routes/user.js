@@ -1,6 +1,6 @@
 const express = require("express");
-const bcrypt  = require
-const User  = require("../models/users.js");
+const bcrypt  = require('bcrypt')
+const User  = require("../models/users");
 
 const { sendResetEmail } =  require('../utils/MailSender');
 
@@ -52,7 +52,6 @@ router.post('/api/login', async (req, res) => {
       // Find user by email
       const user = await User.findOne({ email });
   
-        console.log(user)
       if (!user) {
         return res.status(400).send("Account doesn't exist");
       }
@@ -72,6 +71,7 @@ router.post('/api/login', async (req, res) => {
       res.status(200).send(userId);
 
     } catch (error) {
+      console.log(error);
       res.status(500).send('An error occurred: ' + error.message);
     }
   });

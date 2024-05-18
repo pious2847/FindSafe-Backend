@@ -19,6 +19,7 @@ router.get('/api/mobiledevices', async (req, res) => {
     }
 });
 
+// Find all mobile devices oof user
 router.get('/api/mobiledevices/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
@@ -33,6 +34,7 @@ router.get('/api/mobiledevices/:userId', async (req, res) => {
       res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
+
 // GET /api/devices/:deviceId/mode
 router.get('/api/devices/:deviceId/mode', async (req, res) => {
   try {
@@ -57,6 +59,7 @@ router.get('/api/devices/:deviceId/mode', async (req, res) => {
   }
 });
 
+// Update device mode
 router.post('/api/devicemode/:userId/:deviceId', async (req, res) => {
     const { userId, deviceId } = req.params;
     const { mode } = req.body;
@@ -88,7 +91,8 @@ router.post('/api/devicemode/:userId/:deviceId', async (req, res) => {
       return res.status(500).json({ message: 'An error occurred: ' + error.message });
     }
 });
-  
+
+// create a new device 
 router.post('/api/mobiledevices', async(req, res)=>{
     try {
         const { devicename, imageUrl } = req.body;
@@ -139,6 +143,7 @@ router.get('/api/mobiledevices/:deviceId/locations', async (req, res) => {
 });
 
 
+
 router.post('/api/register-device/:userId/:devicename/:modelNumber', async (req, res) => {
 try {
     const {userId,devicename, modelNumber} = req.params;
@@ -184,6 +189,7 @@ try {
 
 })
 
+// Register device location 
 router.post('/api/register-location/:deviceId', async (req, res) =>{
  try {
    const { deviceId } = req.params;
@@ -225,6 +231,7 @@ router.post('/api/register-location/:deviceId', async (req, res) =>{
 
 })
 
+// Update device location
 router.post('/api/update-location', async (req, res) => {
   try {
     const { deviceId, latitude, longitude } = req.body;
@@ -252,6 +259,7 @@ router.post('/api/update-location', async (req, res) => {
   }
 });
 
+// Validate user activation code
 router.post('/api/:deviceId/validate-activation-code', (req, res)=>{
   const {deviceId} = req.params.deviceId;
   const {activationCode} = req.body;

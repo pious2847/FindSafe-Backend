@@ -1,46 +1,44 @@
+// device.js
 const mongoose = require("mongoose");
 
 const DevicesInfo = new mongoose.Schema({
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'user'
-    },
-    devicename: {
-        type: String,
-        trim: true,
-        require: true
-    },
-    mode:{
-        type: String,
-        trim: true,
-        default: 'active',
-    },
-    activationCode:{
-        type: String,
-        trim: true,
-        default: ' ',
-    },
-    modelNumber:{
-     type: String,
-     trim: true
-    },
-    curretlocation:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Location'
-    },
-    locationHistory:[{
-     type : mongoose.Schema.Types.ObjectId,
-     ref: 'Location'
-    }
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  devicename: {
+    type: String,
+    trim: true,
+    required: true
+  },
+  mode: {
+    type: String,
+    trim: true,
+    default: 'active',
+  },
+  activationCode: {
+    type: String,
+    trim: true,
+    default: ' ',
+  },
+  modelNumber: {
+    type: String,
+    trim: true
+  },
+  curretlocation: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Location'
+  },
+  locationHistory: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Location'
+  }],
+  image: {
+    type: String,
+    required: true
+  }
+});
 
-    ],
-    image: {
-      type: String,
-      require: true
-    }
-})
-
-
-const Devices = mongoose.model('devices', DevicesInfo);
+const Devices = mongoose.model('Device', DevicesInfo);
 
 module.exports = Devices;
