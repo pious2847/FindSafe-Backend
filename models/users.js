@@ -18,6 +18,27 @@ const UserSchema = new mongoose.Schema({
     unique: true,
     required: true,
   },
+  addressinfo:{
+    area:{
+      type: String,
+      trim: true
+    },
+    houseNo:{
+      type: String,
+      trim: true
+    },
+  },
+  emergencycontact:{
+    name: {
+      type: String,
+      trim: true
+    },
+    contact:{
+    type: String,
+    trim: true,
+    required: true,
+    }
+  },
   verified: {
     type: Boolean,
     default: false,
