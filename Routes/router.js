@@ -149,7 +149,6 @@ try {
     const {userId,devicename, modelNumber} = req.params;
 
   let deviceimage = '';
-  console.log('Error occured here' + userId);
   const user = await User.findById(userId);
 
   if(!user){
