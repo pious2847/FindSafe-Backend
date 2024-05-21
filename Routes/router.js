@@ -175,7 +175,7 @@ try {
   
   await device.save();
 
- user.Devices.push(device._id);
+ user.devices.push(device._id);
 
  user.save();
 
@@ -188,47 +188,82 @@ try {
 
 })
 
-// Register device location 
-router.post('/api/register-location/:deviceId', async (req, res) =>{
- try {
-   const { deviceId } = req.params;
-   const { latitude, longitude } = req.body;
- 
-   const device = await DevicesInfo.findById(deviceId);
+router.post('/api/register-location/:deviceId', async (req, res) => {
+  try {
+    const { deviceId } = req.params;
+    const { latitude, longitude } = req.body;
+    console.log(req.body);
 
-   if (!device) {
-     return res.status(404).json({ error: 'Device not found' });
-   }
-  const locationId = deviceExists.curretlocation;
-  
-  const locationExists = await Location.findOne({_id:locationId})
+    const device = await DevicesInfo.findById(deviceId);
+    if (!device) {
+      return res.status(404).json({ error: 'Device not found' });
+    }
 
-  if (locationExists){
-    locationExists.latitude = latitude;
-    locationExists.longitude = longitude;
-
-    locationExists.save();
-  }
     // Create a new location document
     const newLocation = new Location({
       latitude: parseFloat(latitude),
       longitude: parseFloat(longitude)
     });
     await newLocation.save();
-  
+
     // Update the device's current location and push the new location to the history
+    if (device.curretlocation) {
+      // If currentLocation is not null, push it to the locationHistory
+      device.locationHistory.push(device.curretlocation);
+    }
     device.curretlocation = newLocation._id;
     device.locationHistory.push(newLocation._id);
     await device.save();
 
+    res.status(201).json({ message: 'Location added successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred: ' + error.message });
+  }
+});
+
+// // Register device location 
+// router.post('/api/register-location/:deviceId', async (req, res) =>{
+//  try {
+//    const { deviceId } = req.params;
+//    const { latitude, longitude } = req.body;
  
-  res.status(201).json({ message: 'Location added successfully',  });c
+//    console.log(req.body);
 
- } catch (error) {
-  res.status(500).json({ message: 'An error occurred: ' + error.message });
- }
+//    const device = await DevicesInfo.findById(deviceId);
 
-})
+//    if (!device) {
+//      return res.status(404).json({ error: 'Device not found' });
+//    }
+//   const locationId = device.curretlocation;
+  
+//   const locationExists = await Location.findOne({_id:locationId})
+
+//   if (locationExists){
+//     locationExists.latitude = latitude;
+//     locationExists.longitude = longitude;
+
+//     locationExists.save();
+//   }
+//     // Create a new location document
+//     const newLocation = new Location({
+//       latitude: parseFloat(latitude),
+//       longitude: parseFloat(longitude)
+//     });
+//     await newLocation.save();
+  
+//     // Update the device's current location and push the new location to the history
+//     device.curretlocation = newLocation._id;
+//     device.locationHistory.push(newLocation._id);
+//     await device.save();
+
+ 
+//   res.status(201).json({ message: 'Location added successfully',  });c
+
+//  } catch (error) {
+//   res.status(500).json({ message: 'An error occurred: ' + error.message });
+//  }
+
+// })
 
 // Update device location
 router.post('/api/update-location', async (req, res) => {

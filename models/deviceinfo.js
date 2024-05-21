@@ -27,7 +27,8 @@ const DevicesInfo = new mongoose.Schema({
   },
   curretlocation: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Location'
+    ref: 'Location',
+    default: null 
   },
   locationHistory: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -39,6 +40,6 @@ const DevicesInfo = new mongoose.Schema({
   }
 });
 
-const Devices = mongoose.model('Device', DevicesInfo);
+const Devices = mongoose.model('Devices', DevicesInfo);
 
 module.exports = Devices;

@@ -31,14 +31,11 @@ router.post('/api/signup', async (req, res) => {
        password: hashedPassword
       });
   // send verified codes for user
-      const emailsend = await sendResetEmail(email, user, req, res);
+      await sendResetEmail(email, user, req, res);
 
-      if (emailsend) {
         // Save the new user to the database
       await user.save();
       res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
-      console.log( "Email sent Successfully ",emailsend);
-      }
       
     } catch (error) {
       res.status(500).send('An error occurred: ' + error.message);

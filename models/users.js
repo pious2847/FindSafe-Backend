@@ -10,7 +10,6 @@ const UserSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true,
-    required: true,
   },
   email: {
     type: String,
@@ -36,7 +35,6 @@ const UserSchema = new mongoose.Schema({
     contact:{
     type: String,
     trim: true,
-    required: true,
     }
   },
   verified: {
@@ -51,7 +49,7 @@ const UserSchema = new mongoose.Schema({
   devices: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Device",
+      ref: "Devices",
     },
   ],
 });
