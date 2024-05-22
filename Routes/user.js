@@ -17,7 +17,7 @@ router.get('/api/get-user/:UserId', async (req, res) => {
   try {
     const user = await User.findOne({_id:UserId}) // Ensure the query is awaited and resolved
     console.log(user);
-    
+
     if (!user) {
       return res.status(404).send('User not found');
     }
@@ -103,24 +103,36 @@ router.post('/api/login', async (req, res) => {
     }
   });
 
-router.put('/api/update/:userId', async (req, res) => {
+  router.put('/api/update/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
       const updatedData = req.body;
   
-      const user = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+      const updatedFields = Object.entries(updatedData).reduce((acc, [key, value]) => {
+        if (key.includes('.')) {
+          const [rootKey, nestedKey] = key.split('.');
+          acc[`${rootKey}.${'.$'}.${nestedKey}`] = value;
+        } else {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+  
+      const user = await User.findByIdAndUpdate(userId, { $set: updatedFields }, { new: true });
   
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-  
-      res.json(user);
+      await user.save();
+      console.error(user);
+
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
     }
   });
-
 router.post('/api/authenticate-account/:userId', async(req, res)=>{
 try {
     const {userId} = req.params;
