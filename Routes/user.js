@@ -11,6 +11,36 @@ router.get('/', (req, res)=>{
     res.send('Hello, world!')
 })
 
+router.get('/api/get-user/:UserId', async (req, res) => {
+  const UserId = req.params.UserId;
+
+  try {
+    const user = await User.findOne({_id:UserId}) // Ensure the query is awaited and resolved
+    console.log(user);
+    
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    res.status(200).json({ message: 'User Retrieved Successfully', User: user });
+  } catch (e) {
+    res.status(500).send('Error: ' + e.message);
+  }
+});
+
+// router.get('/api/get-user/:UserId', async (req, res) => {
+//   const UserId = req.params.UserId;
+
+//   try {
+//     const user = await User.findById(UserId);
+//     if (!user) {
+//       return res.status(404).send('User not found');
+//     }
+//     res.status(200).send({ message: 'User Retrieved Successfully', User: user });
+//   } catch (e) {
+//     res.status(500).send('Error: ' + e.message);
+//   }
+// });
+
 router.post('/api/signup', async (req, res) => {
     try {
       const { username, email,  password } = req.body;
@@ -73,7 +103,23 @@ router.post('/api/login', async (req, res) => {
     }
   });
 
-
+router.put('/api/update/:userId', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const updatedData = req.body;
+  
+      const user = await User.findByIdAndUpdate(userId, updatedData, { new: true });
+  
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      res.json(user);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
+    }
+  });
 
 router.post('/api/authenticate-account/:userId', async(req, res)=>{
 try {

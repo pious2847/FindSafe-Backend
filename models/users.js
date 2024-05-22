@@ -10,6 +10,7 @@ const UserSchema = new mongoose.Schema({
   phone: {
     type: String,
     trim: true,
+    default :''
   },
   email: {
     type: String,
@@ -20,21 +21,25 @@ const UserSchema = new mongoose.Schema({
   addressinfo:{
     area:{
       type: String,
-      trim: true
+      trim: true,
+      default: ''
     },
     houseNo:{
       type: String,
-      trim: true
+      trim: true,
+      default:  ''
     },
   },
   emergencycontact:{
     name: {
       type: String,
-      trim: true
+      trim: true,
+      default:''
     },
     contact:{
     type: String,
     trim: true,
+    default: ''
     }
   },
   verified: {
