@@ -117,37 +117,37 @@ router.post('/api/login', async (req, res) => {
       if(username){
         user.name = username;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Username updated sucessfully', user:user})
 
       }else if(email){
         user.email = email;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Email updated sucessfully', user:user})
 
       }else if(phone){
         user.phone = phone;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Phone updated sucessfully', user:user})
 
       }else if(area){
         user.addressinfo.area = area;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Area updated sucessfully', user:user})
 
       }else if(houseNo){
         user.addressinfo.houseNo = houseNo;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'House No updated sucessfully', user:user})
 
       }else if(name){
         user.emergencycontact.name = name;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Emegency info updated sucessfully', user:user})
 
       }else if(contact){
         user.emergencycontact.contact = contact;
         await user.save();
-      res.status(200).send({message: 'user updated sucessfully', user:user})
+      res.status(200).send({message: 'Emegency Contact updated sucessfully', user:user})
 
       }else{
 
