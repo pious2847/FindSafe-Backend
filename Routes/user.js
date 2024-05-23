@@ -106,33 +106,60 @@ router.post('/api/login', async (req, res) => {
   router.put('/api/update/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
-      const updatedData = req.body;
-  
-      const updatedFields = Object.entries(updatedData).reduce((acc, [key, value]) => {
-        if (key.includes('.')) {
-          const [rootKey, nestedKey] = key.split('.');
-          acc[`${rootKey}.${'.$'}.${nestedKey}`] = value;
-        } else {
-          acc[key] = value;
-        }
-        return acc;
-      }, {});
-  
-      const user = await User.findByIdAndUpdate(userId, { $set: updatedFields }, { new: true });
-  
+      const {username, email,phone, area, houseNo, name, contact} = req.body;
+
+      const user =  await User.findOne({_id: userId});
+
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-      await user.save();
-      console.error(user);
-
+     
+      if(username){
+        user.name = username;
+        await user.save();
       res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(email){
+        user.email = email;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(phone){
+        user.phone = phone;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(area){
+        user.addressinfo.area = area;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(houseNo){
+        user.addressinfo.houseNo = houseNo;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(name){
+        user.emergencycontact.name = name;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else if(contact){
+        user.emergencycontact.contact = contact;
+        await user.save();
+      res.status(200).send({message: 'user updated sucessfully', user:user})
+
+      }else{
+
+        res.status(500).json({ error: 'Server error' });
+      } 
 
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
     }
   });
+
 router.post('/api/authenticate-account/:userId', async(req, res)=>{
 try {
     const {userId} = req.params;
