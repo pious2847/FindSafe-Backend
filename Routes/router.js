@@ -188,6 +188,7 @@ try {
 
 })
 
+// Register device location 
 router.post('/api/register-location/:deviceId', async (req, res) => {
   try {
     const { deviceId } = req.params;
@@ -221,7 +222,7 @@ router.post('/api/register-location/:deviceId', async (req, res) => {
   }
 });
 
-// // Register device location 
+// 
 // router.post('/api/register-location/:deviceId', async (req, res) =>{
 //  try {
 //    const { deviceId } = req.params;
@@ -313,6 +314,25 @@ router.post('/api/:deviceId/validate-activation-code', (req, res)=>{
  } catch (error) {
   res.status(500).json({message: `Internal sever Error ${error}`, isValid: false});
  }
+})
+
+
+// Delte device by id 
+router.delete('/api/deletedevice/:deviceId', async (req, res)=>{
+  const deviceId = req.params.deviceId;
+
+  try {
+    const device = await DevicesInfo.findOne({_id: deviceId});
+
+    if(!device){
+      res.send(404).send({message: 'Device not found'})
+    }
+    await DevicesInfo.findByIdAndDelete(deviceId)
+    res.status(200).send({message: 'Device deleted Sucessfully'});
+  } catch (error) {
+    res.status(500).send({message: `An error occurred while deleting ${error}  `});
+    
+  }
 })
 
 module.exports = router;
