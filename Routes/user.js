@@ -21,25 +21,14 @@ router.get('/api/get-user/:UserId', async (req, res) => {
     if (!user) {
       return res.status(404).send('User not found');
     }
-    res.status(200).json({ message: 'User Retrieved Successfully', User: user });
+    res.status(200).json({ message: '', User: user });
   } catch (e) {
-    res.status(500).send('Error: ' + e.message);
+    res.status(500).send({message: `An error occurred : ${error.message}`});
+
   }
 });
 
-// router.get('/api/get-user/:UserId', async (req, res) => {
-//   const UserId = req.params.UserId;
 
-//   try {
-//     const user = await User.findById(UserId);
-//     if (!user) {
-//       return res.status(404).send('User not found');
-//     }
-//     res.status(200).send({ message: 'User Retrieved Successfully', User: user });
-//   } catch (e) {
-//     res.status(500).send('Error: ' + e.message);
-//   }
-// });
 
 router.post('/api/signup', async (req, res) => {
     try {
@@ -49,7 +38,7 @@ router.post('/api/signup', async (req, res) => {
       const userExists = await User.findOne({ email });
   
       if (userExists) {
-        return res.status(400).send('Username already exists');
+        return res.status(400).send({message: 'Account already exists'});
       }
 
      const hashedPassword = await bcrypt.hash(password, 10);
@@ -65,10 +54,11 @@ router.post('/api/signup', async (req, res) => {
 
         // Save the new user to the database
       await user.save();
-      res.status(200).send('Account created successfully,' + 'Verification Code Sent Successfully');
+      res.status(200).send({message: 'Account created successfully, Verification Code Sent Successfully'});
       
     } catch (error) {
-      res.status(500).send('An error occurred: ' + error.message);
+      res.status(500).send({message: `An error occurred : ${error.message}`});
+
     }
 });
 
@@ -80,14 +70,14 @@ router.post('/api/login', async (req, res) => {
       const user = await User.findOne({ email });
   
       if (!user) {
-        return res.status(400).send("Account doesn't exist");
+        return res.status(400).send({message: "Invalid Email and Password"});
       }
   
       // Compare passwords
       const isPasswordValid = await bcrypt.compare(password, user.password);
   
       if (!isPasswordValid) {
-        return res.status(400).send('Invalid password');
+        return res.status(400).send({message : 'Invalid password Entered'});
       }
   
       // Set session variables
@@ -99,7 +89,7 @@ router.post('/api/login', async (req, res) => {
 
     } catch (error) {
       console.log(error);
-      res.status(500).send('An error occurred: ' + error.message);
+      res.status(500).send({message: `An error occurred : ${error.message}`});
     }
   });
 
