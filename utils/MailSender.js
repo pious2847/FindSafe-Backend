@@ -52,11 +52,11 @@ const sendResetEmail = async (email, user,  _req, res) => {
     });
 
     await newPasswordReset.save();
-    await transporter.sendMail(mailOptions, (error, info)=>{
-      if(error){
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
         console.log(error);
-      }else{
-        console.log("Email has been sent Sucessfully" + info.response)
+      } else {
+        console.log("Email has been sent Sucessfully" + info.response);
       }
     });
 
@@ -160,7 +160,7 @@ const getUserProfile = async (req, res) => {
   }
 };
 
-const sendEmail = async (name, email, reciepient, subject, message) => {
+const sendEmail = async (name, reciepient, subject, message) => {
 
   const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -171,13 +171,13 @@ const sendEmail = async (name, email, reciepient, subject, message) => {
   });
 
   const mailOptions = {
-    from: email,
+    from: process.env.AUTH_EMAIL,
     to: reciepient,
     subject: subject,
     html: `
     <div style="background-color: #f0f0f0; padding: 20px; border-radius: 10px; font-family: 'Arial', sans-serif; color: #333;">
-    <h2 style="color: #007BFF; font-size: 28px; margin-bottom: 15px;">Hello ${name},</h2>
-    <blockquote style="border-left: 2px solid #007BFF; padding-left: 15px; color: #555; font-size: 16px; line-height: 1.6;">${message}</blockquote>
+    <h2 style="color: #007BFF; font-size: 20px; margin-bottom: 15px;">Hello ${name},</h2><br>
+    ${message}
     </div>
 
     `,
@@ -190,6 +190,7 @@ const sendEmail = async (name, email, reciepient, subject, message) => {
     // Sending email
     await transporter.sendMail(mailOptions);
   } catch (error) {
+    console.log(error)
     throw error;
   }
 };
