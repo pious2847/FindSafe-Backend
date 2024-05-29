@@ -24,6 +24,7 @@
     "express": "^4.19.2",
     "express-flash": "^0.0.2",
     "express-session": "^1.17.3",
+    "firebase-admin": "^12.1.1",
     "lodash": "^4.17.21",
     "mongodb": "^6.5.0",
     "mongoose": "^7.4.1",

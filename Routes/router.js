@@ -90,7 +90,7 @@ router.post("/api/devicemode/:userId/:deviceId", async (req, res) => {
       <div>
       <blockquote style="border-left: 2px solid #007BFF; padding-left: 13px; color: #555; font-size: 13px; line-height: 1.6;">Your ${mobileDevices.devicename} is currently in disabled mode due to security reasons. To unlock and activate your device, please enter the activation code provided below: <br>
       <br>
-      Activation Code: <span style = " padding: 6px; background-color:  #007BFF; border-radius: 5px;"> ${verificationCode}</span> <br>
+      Activation Code: <span style = " padding: 6px; background-color:  #70bcef; border-radius: 5px; color: white;"> ${verificationCode}</span> <br>
       <br>
       Please enter the activation code exactly as shown to complete the activation process. If you encounter any issues or have questions, please contact our support team for further assistance <br>
       <br>
