@@ -69,7 +69,7 @@ startServer();
 
 
 // Function to handle server and database connections
- function startServer() {
+async function startServer() {
   const PORT  = process.env.PORT || 8080;
  
     try {
