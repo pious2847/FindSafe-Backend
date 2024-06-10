@@ -1,6 +1,9 @@
 // default import
 const express = require('express');
  require('dotenv').config();
+const path = require('path')
+const compression = require('compression')
+
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
@@ -24,6 +27,7 @@ app.use(session({
 }));
 
 // Middleware to parse JSON bodies
+app.use(compression());
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('tiny'))
@@ -33,10 +37,18 @@ app.use(cors())
 // Body parser
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+// Configure Express to serve static files from the "public" directory
+app.use(express.static(path.join(__dirname, './public')));
 
 
 // custom imports
-const ConnectDB = require('./database/DB');
+require('./database/DB')();
+
+//============================== Configure EJS as the view engine===================//
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
+
 const userRouter = require('./Routes/user');
 const router = require('./Routes/router');
 
@@ -73,8 +85,7 @@ async function startServer() {
   const PORT  = process.env.PORT || 8080;
  
     try {
-    //  connection established and connected to database
-         ConnectDB();
+
         //  process.env.IP,
       // Start the Express server
       app.listen(PORT, (error) => {
