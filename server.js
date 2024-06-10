@@ -60,12 +60,13 @@ app.use(router)
 // Function to handle server and database connections
 async function startServer() {
   const PORT  = process.env.PORT || 8080;
+ 
     try {
     //  connection established and connected to database
          ConnectDB();
          
       // Start the Express server
-      app.listen(PORT,  (error) => {
+      app.listen(PORT,  process.env.IP,(error) => {
         if (error) {
           console.log(error)
       }
