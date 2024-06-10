@@ -64,9 +64,9 @@ async function startServer() {
     try {
     //  connection established and connected to database
          ConnectDB();
-         
+        //  process.env.IP,
       // Start the Express server
-      app.listen(PORT,  process.env.IP,(error) => {
+      app.listen(PORT, (error) => {
         if (error) {
           console.log(error)
       }
