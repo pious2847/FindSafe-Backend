@@ -56,6 +56,15 @@ app.use(userRouter)
 app.use(router)
 
 
+// ===============Handiling UncaughtExeptions ======================//
+
+process.on("uncaughtException", (err) => {
+  console.log(err.name, err.message);
+  console.log(err)
+  console.log("UNHANDLED EXCEPTION! 💥 Shutting down...");
+  process.exit(1);
+});
+
 
 // Function to handle server and database connections
 async function startServer() {
@@ -83,3 +92,13 @@ async function startServer() {
   
   startServer();
   
+// ===============Handiling UnhandledRejection======================//
+
+process.on("unhandledRejection", (err) => {
+  console.log(err.name, err.message);
+  console.log(err)
+  console.log("UNHANDLED REJECTION! 💥 Shutting down...");
+  server.close(() => {
+      process.exit(1);
+  });
+}); 
