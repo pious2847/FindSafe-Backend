@@ -64,10 +64,11 @@ process.on("uncaughtException", (err) => {
   console.log("UNHANDLED EXCEPTION! 💥 Shutting down...");
   process.exit(1);
 });
+startServer();
 
 
 // Function to handle server and database connections
-async function startServer() {
+ function startServer() {
   const PORT  = process.env.PORT || 8080;
  
     try {
@@ -90,7 +91,6 @@ async function startServer() {
     }
   }
   
-  startServer();
   
 // ===============Handiling UnhandledRejection======================//
 
