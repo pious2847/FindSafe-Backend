@@ -8,7 +8,7 @@ const { sendResetEmail } =  require('../utils/MailSender');
 const router = express.Router();
 
 router.get('/', (req, res)=>{
-    res.send('Hello, world!')
+    res.render('home')
 })
 
 router.get('/api/get-user/:UserId', async (req, res) => {
@@ -27,8 +27,6 @@ router.get('/api/get-user/:UserId', async (req, res) => {
 
   }
 });
-
-
 
 router.post('/api/signup', async (req, res) => {
     try {
