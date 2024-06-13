@@ -2,34 +2,32 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const PasswordReset = require("../models/utils_models/PasswordReset.js");
 const Users = require("../models/users.js");
+const axios = require("axios");
 
-
-const transporter =  nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   service: "gmail",
-  auth: { user: process.env.AUTH_EMAIL, 
-    pass: process.env.AUTH_PASS }
+  auth: { user: process.env.AUTH_EMAIL, pass: process.env.AUTH_PASS },
 });
 
-
-const sendResetEmail = async (email, user,  _req, res) => {
+const sendResetEmail = async (email, user, _req, res) => {
   if (!user) {
-    return res.status(400).send('Account not found');
+    return res.status(400).send("Account not found");
   }
 
   const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
- await transporter.verify((error, success)=>{
-   if (error) {
-    console.log('===============================================', error);
-   }else{
-    console.log( success);
-   }
-  })
+  await transporter.verify((error, success) => {
+    if (error) {
+      console.log("===============================================", error);
+    } else {
+      console.log(success);
+    }
+  });
 
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
-    subject: 'Password Verification Code',
-    html : `
+    subject: "Password Verification Code",
+    html: `
       <div style="background-color: #f0f0f0; padding: 20px;">
         <h2 style="color: #333; font-size: 24px;">Password Verification Code</h2>
         <p style="color: #555; font-size: 16px;">Enter the verification code below to verify your email and initiate a password reset.</p>
@@ -59,13 +57,11 @@ const sendResetEmail = async (email, user,  _req, res) => {
         console.log("Email has been sent Sucessfully" + info.response);
       }
     });
-
   } catch (error) {
     console.log(error);
     throw error;
   }
 };
-
 
 const resetPassword = async (verificationCode, userId, req, res) => {
   try {
@@ -161,7 +157,6 @@ const getUserProfile = async (req, res) => {
 };
 
 const sendEmail = async (name, reciepient, subject, message) => {
-
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -190,15 +185,53 @@ const sendEmail = async (name, reciepient, subject, message) => {
     // Sending email
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.log(error)
+    console.log(error);
     throw error;
   }
 };
 
-module.exports =  {
+const sendSMS = async (sender, message, recipientsPhone) => {
+  try {
+    // SEND SMS
+    const data = {
+      sender,
+      message,
+      recipients : [recipientsPhone],
+    };
+
+    const config = {
+      method: "post",
+      url: "https://sms.arkesel.com/api/v2/sms/send",
+      headers: {
+        "api-key": process.env.ARKESEL_API,
+      },
+      data,
+    };
+
+    const response = await axios(config);
+    console.log(response.data);
+  } catch (error) {
+    if (error.response) {
+      // The request was made, and the server responded with a status code
+      // that falls out of the range of 2xx
+      console.error("SMS API Error:", error.response.data);
+      console.error("SMS API Status:", error.response.status);
+    } else if (error.request) {
+      // The request was made, but no response was received
+      console.error("SMS API Error:", error.request);
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      console.error("SMS API Error:", error.message);
+    }
+  }
+};
+
+
+module.exports = {
   sendResetEmail,
   resetPassword,
   updateUserPassword,
   getUserProfile,
   sendEmail,
+  sendSMS,
 };
