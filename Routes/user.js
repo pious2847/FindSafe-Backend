@@ -82,11 +82,11 @@ router.post('/api/login', async (req, res) => {
       req.session.userId = user._id;
       req.session.isLoggedIn = true;
       let userId = user._id
-     const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
+    //  const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
       
-      const message = `Use the following code : ${verificationCode} as your FindSafe Security Verification Code`
-        console.log('SMSSend Trigged')
-        await sendSMS('FindSafe', message, '233201025963');
+    //   const message = `Use the following code : ${verificationCode} as your FindSafe Security Verification Code`
+    //     console.log('SMSSend Trigged')
+    //     await sendSMS('FindSafe', message, '233201025963');
 
   
       res.status(200).send(userId);
