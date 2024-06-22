@@ -1,43 +1,47 @@
 // websocket.js
-const WebSocket = require('websocket');
 
-let deviceConnections = {};
+const WebSocket = require('ws');
 
-const sendCommandToDevice = (deviceId, command) => {
-    return new Promise((resolve, reject) => {
-        if (deviceConnections[deviceId]) {
-            deviceConnections[deviceId].sendUTF(JSON.stringify({ command }));
-            resolve({ success: true });
-        } else {
-            reject(new Error('Device not connected'));
-        }
-    });
-};
+let wss;
+const deviceConnections = new Map();
 
 function setupWebSocket(server) {
-    const wss = new WebSocket.server({
-        httpServer: server,
-        autoAcceptConnections: false
+  wss = new WebSocket.Server({ server });
+
+  wss.on('connection', (ws, req) => {
+    const deviceId = req.url.slice(1); // Remove the leading '/'
+    deviceConnections.set(deviceId, ws);
+
+    console.log(`Device ${deviceId} connected`);
+
+    ws.on('close', () => {
+      deviceConnections.delete(deviceId);
+      console.log(`Device ${deviceId} disconnected`);
     });
 
-    wss.on('request', (request) => {
-        const connection = request.accept(null, request.origin);
-        const deviceId = request.resourceURL.pathname.replace('/', '');
-        
-        deviceConnections[deviceId] = connection;
-        console.log(`Device ${deviceId} connected`);
-
-        connection.on('close', () => {
-            delete deviceConnections[deviceId];
-            console.log(`Device ${deviceId} disconnected`);
-        });
-
-        connection.on('message', (message) => {
-            if (message.type === 'utf8') {
-                console.log(`Received message from device ${deviceId}: ${message.utf8Data}`);
-            }
-        });
+    ws.on('message', (message) => {
+      console.log(`Received message from device ${deviceId}: ${message}`);
+      // Handle incoming messages if needed
     });
+  });
 }
 
-module.exports = { setupWebSocket, sendCommandToDevice };
+function sendCommandToDevice(deviceId, command) {
+  const device = deviceConnections.get(deviceId);
+  
+  if (device) {
+    device.send(JSON.stringify({ command }));
+    return true;
+  }
+  return false;
+}
+
+function getConnectedDevices() {
+  return Array.from(deviceConnections.keys());
+}
+
+module.exports = {
+  setupWebSocket,
+  sendCommandToDevice,
+  getConnectedDevices
+};

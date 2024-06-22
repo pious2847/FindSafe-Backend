@@ -6,7 +6,7 @@ const Location = require("../models/locations");
 const User = require("../models/users");
 const bcrypt = require('bcrypt');
 const { sendEmail } =  require('../utils/MailSender');
-const { sendCommandToDevice } = require('../utils/websocket')
+const { sendCommandToDevice, getConnectedDevices }= require('../utils/websocket')
 
 router.get("/api/mobiledevices", async (req, res) => {
   try {
@@ -338,22 +338,20 @@ router.delete("/api/deletedevice/:deviceId", async (req, res) => {
 
 
 // ================== Device Sudo Command ====================//
-// POST route to send a command to a device
-router.post('/api/device/:deviceId/alarm', async (req, res) => {
-  const deviceId = req.params.deviceId;
 
-  if (!deviceId) {
-      return res.status(400).send({ error: 'Device ID is required' });
-  }
-
-  try {
-      const result = await sendCommandToDevice(deviceId, 'play_alarm');
-      res.status(200).send(result);
-  } catch (error) {
-      console.error(error);
-      res.status(500).send({ error: 'Failed to send command to device' });
+router.post('/api/device/:deviceId/alarm', (req, res) => {
+  const { deviceId } = req.params;
+  
+  if (sendCommandToDevice(deviceId, 'play_alarm')) {
+    res.json({ success: true, message: 'Alarm command sent successfully' });
+  } else {
+    res.status(404).json({ success: false, message: 'Device not found or not connected' });
   }
 });
 
+router.get('/api/connected-devices', (req, res) => {
+  const devices = getConnectedDevices();
+  res.json({ success: true, devices });
+});
 
 module.exports = router;
