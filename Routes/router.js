@@ -340,7 +340,7 @@ router.delete("/api/deletedevice/:deviceId", async (req, res) => {
 
 
 
-router.post('/api/device/:id/:command', (req, res)=>{
+router.post('/api/device/:id/alarm', (req, res)=>{
 
 })
 
