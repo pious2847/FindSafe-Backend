@@ -1,5 +1,5 @@
 // Function to send command to a device
-module.exports.sendCommandToDevice = (deviceId, command) => {
+module.exports.sendCommandToDevice = function sendCommandToDevice(deviceId, command) {
     return new Promise((resolve, reject) => {
         if (deviceConnections[deviceId]) {
             deviceConnections[deviceId].send(JSON.stringify({ command }), (err) => {
