@@ -15,7 +15,7 @@ router.get("/api/mobiledevices", async (req, res) => {
 
     res.status(200).json({ mobileDevices });
 
-    console.log(mobileDevices);
+    // console.log(mobileDevices);
   } catch (error) {
     res.status(500).json({ message: "An error occurred: " + error.message });
   }
@@ -26,10 +26,10 @@ router.get("/api/mobiledevices/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
     // Find all mobile devices
-    console.log(userId);
+    // console.log(userId);
     const mobileDevices = await DevicesInfo.find({ user: userId });
 
-    console.log(mobileDevices);
+    // console.log(mobileDevices);
     res.status(200).json({ mobileDevices });
   } catch (error) {
     res.status(500).json({ message: "An error occurred: " + error.message });
@@ -70,10 +70,10 @@ router.post("/api/devicemode/:userId/:deviceId", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    console.log(userId);
+    // console.log(userId);
    
     const mobileDevices = await DevicesInfo.findOne({ _id: deviceId });
-    console.log(mobileDevices);
+    // console.log(mobileDevices);
 
     if (!mobileDevices) {
       return res.status(404).json({ message: "No devices found" });
@@ -232,7 +232,7 @@ router.post("/api/register-location/:deviceId", async (req, res) => {
   try {
     const { deviceId } = req.params;
     const { latitude, longitude } = req.body;
-    console.log(req.body);
+    // console.log(req.body);
 
     const device = await DevicesInfo.findById(deviceId);
     if (!device) {
