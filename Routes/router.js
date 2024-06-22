@@ -6,7 +6,7 @@ const Location = require("../models/locations");
 const User = require("../models/users");
 const bcrypt = require('bcrypt');
 const { sendEmail } =  require('../utils/MailSender');
-const sendCommandToDevice = require('../utils/websocket')
+const { sendCommandToDevice } = require('../server')
 
 router.get("/api/mobiledevices", async (req, res) => {
   try {

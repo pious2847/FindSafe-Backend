@@ -23,6 +23,16 @@ const wss = new WebSocket.server({
 
 let deviceConnections = {};
 
+const sendCommandToDevice = (deviceId, command) => {
+  return new Promise((resolve, reject) => {
+      if (deviceConnections[deviceId]) {
+          deviceConnections[deviceId].sendUTF(JSON.stringify({ command }));
+          resolve({ success: true });
+      } else {
+          reject(new Error('Device not connected'));
+      }
+  });
+};
 
 wss.on('request', (request) => {
     const connection = request.accept(null, request.origin);
@@ -134,3 +144,5 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
+// Export the sendCommandToDevice function if you need to use it in other files
+module.exports = { sendCommandToDevice };
