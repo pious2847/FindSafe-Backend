@@ -60,7 +60,48 @@ router.post('/api/signup', async (req, res) => {
     }
 });
 
-router.post('/api/login', async (req, res) => {
+// router.post('/api/login', async (req, res) => {
+//     try {
+//       const { email, password } = req.body;
+  
+//       // Find user by email
+//       const user = await User.findOne({ email });
+  
+//       if (!user) {
+//         return res.status(400).send({message: "Invalid Email and Password"});
+//       }
+  
+//       // Compare passwords
+//       const isPasswordValid = await bcrypt.compare(password, user.password);
+  
+//       if (!isPasswordValid) {
+//         return res.status(400).send({message : 'Invalid password Entered'});
+//       }
+  
+//       // Set session variables
+//       req.session.userId = user._id;
+//       req.session.isLoggedIn = true;
+//       let userId = user._id
+//     //  const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
+      
+//     //   const message = `Use the following code : ${verificationCode} as your FindSafe Security Verification Code`
+//     //     console.log('SMSSend Trigged')
+//     //     await sendSMS('FindSafe', message, '233201025963');
+
+  
+//       res.status(200).send({
+//         success: true,
+//         message: 'User logged in successfully',
+//         userId,
+//             }
+//       );
+
+//     } catch (error) {
+//       console.log(error);
+//       res.status(500).send({message: `An error occurred : ${error.message}`});
+//     }
+//   });
+  router.post('/api/login', async (req, res) => {
     try {
       const { email, password } = req.body;
   
@@ -78,25 +119,26 @@ router.post('/api/login', async (req, res) => {
         return res.status(400).send({message : 'Invalid password Entered'});
       }
   
+      // Generate a session token (you can use a library like jsonwebtoken for this)
+      const sessionToken = generateSessionToken(user._id);
+  
       // Set session variables
       req.session.userId = user._id;
       req.session.isLoggedIn = true;
-      let userId = user._id
-    //  const verificationCode = `${Math.floor(100000 + Math.random() * 900000)}`;
-      
-    //   const message = `Use the following code : ${verificationCode} as your FindSafe Security Verification Code`
-    //     console.log('SMSSend Trigged')
-    //     await sendSMS('FindSafe', message, '233201025963');
-
+      req.session.token = sessionToken;
   
-      res.status(200).send(userId);
-
+      res.status(200).send({
+        success: true,
+        message: 'User logged in successfully',
+        userId: user._id,
+        sessionToken: sessionToken
+      });
+  
     } catch (error) {
       console.log(error);
       res.status(500).send({message: `An error occurred : ${error.message}`});
     }
   });
-
   router.put('/api/update/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
