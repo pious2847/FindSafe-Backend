@@ -7,8 +7,6 @@ const User = require("../models/users");
 const bcrypt = require('bcrypt');
 const { sendEmail } =  require('../utils/MailSender');
 
-
-
 router.get("/api/mobiledevices", async (req, res) => {
   try {
     // Find all mobile devices
@@ -336,5 +334,14 @@ router.delete("/api/deletedevice/:deviceId", async (req, res) => {
       .send({ message: `An error occurred while deleting ${error}  ` });
   }
 });
+
+
+// ================== Device Sudo Command ====================//
+
+
+
+router.post('/api/device/:id/:command', (req, res)=>{
+
+})
 
 module.exports = router;
