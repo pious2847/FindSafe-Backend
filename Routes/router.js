@@ -339,7 +339,7 @@ router.delete("/api/deletedevice/:deviceId", async (req, res) => {
 
 // ================== Device Sudo Command ====================//
 // POST route to send a command to a device
-app.post('/api/device/:deviceId/alarm', async (req, res) => {
+router.post('/api/device/:deviceId/alarm', async (req, res) => {
   const deviceId = req.params.deviceId;
 
   if (!deviceId) {
