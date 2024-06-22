@@ -29,6 +29,7 @@ function setupWebSocket(server) {
 function sendCommandToDevice(deviceId, command) {
   const device = deviceConnections.get(deviceId);
   
+  console.log(`Received command from device ${device}`)
   if (device) {
     device.send(JSON.stringify({ command }));
     return true;
