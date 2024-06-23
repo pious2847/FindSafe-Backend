@@ -1,6 +1,7 @@
 const express = require("express");
 const bcrypt  = require('bcrypt')
 const User  = require("../models/users");
+const jwt = require('jsonwebtoken');
 
 const { sendResetEmail, sendSMS } =  require('../utils/MailSender');
 const {generateSessionToken} = require('../utils/codesGen')
@@ -81,6 +82,7 @@ router.post('/api/signup', async (req, res) => {
   
       // Generate a session token (you can use a library like jsonwebtoken for this)
       const sessionToken = generateSessionToken(user._id);
+      const token =  generateToken(user._id)
   
       // Set session variables
       req.session.userId = user._id;
@@ -91,7 +93,8 @@ router.post('/api/signup', async (req, res) => {
         success: true,
         message: 'User logged in successfully',
         userId: user._id,
-        sessionToken: sessionToken
+        sessionToken: sessionToken,
+        token: token
       });
   
     } catch (error) {
@@ -174,4 +177,8 @@ try {
 }
 })
 
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+      expiresIn: '7d',
+  })}
 module.exports = router
