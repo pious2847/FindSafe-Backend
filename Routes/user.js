@@ -102,7 +102,8 @@ router.post('/api/signup', async (req, res) => {
       res.status(500).send({message: `An error occurred : ${error.message}`});
     }
   });
-  router.put('/api/update/:userId', async (req, res) => {
+
+router.put('/api/update/:userId', async (req, res) => {
     try {
       const userId = req.params.userId;
       const {username, email,phone, area, houseNo, name, contact} = req.body;
