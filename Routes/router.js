@@ -25,8 +25,7 @@ router.get("/api/mobiledevices", async (req, res) => {
 router.get("/api/mobiledevices/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    // Find all mobile devices
-    // console.log(userId);
+
     const mobileDevices = await DevicesInfo.find({ user: userId });
 
     // console.log(mobileDevices);
@@ -166,7 +165,7 @@ router.get("/api/mobiledevices/:deviceId/locations", async (req, res) => {
       _id: { $in: device.locationHistory },
     }).sort({ timestamp: -1 });
 
-    res.json(locationHistory);
+    res.status(200).json(locationHistory);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch location history" });
