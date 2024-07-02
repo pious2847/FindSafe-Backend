@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const http = require('http');  // Add this line
+const { createProxyMiddleware } = require('http-proxy-middleware');
 const {setupWebSocket} = require('./utils/websocket');  // Add this line
 
 const app = express();
@@ -35,6 +36,15 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(morgan('tiny'));
 app.use(cors());
+
+// Setting up http proxy
+app.use('/apis', createProxyMiddleware({
+  target: 'http://api.positionstack.com',
+  changeOrigin: true,
+  pathRewrite: {
+    '^/apis': '', // remove /api from the path
+  },
+}));
 
 // Body parser
 app.use(bodyParser.json());
