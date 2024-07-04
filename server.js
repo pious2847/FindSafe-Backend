@@ -85,7 +85,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-startServer();
+
 
 // Function to handle server and database connections
 async function startServer() {
@@ -107,6 +107,7 @@ async function startServer() {
   }
 }
 
+startServer();
 // ===============Handling UnhandledRejection======================//
 
 process.on("unhandledRejection", (err) => {
