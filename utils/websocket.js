@@ -1,6 +1,6 @@
 const WebSocket = require('ws');
 
-function startWebSocketServer(sever) {
+function startWebSocketServer(server) {
   const wss = new WebSocket.Server({ server });
 
   let clients = {};
