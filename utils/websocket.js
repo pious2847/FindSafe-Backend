@@ -10,13 +10,13 @@ function startWebSocketServer(server) {
     clients[deviceId] = ws;
     console.log(`Device ${deviceId} connected`);
 
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
 
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
-        clients[data.deviceId].send(message);
+       await clients[data.deviceId].send(message);
       } else {
         console.log(`Invalid command or device ID: ${data}`);
       }
