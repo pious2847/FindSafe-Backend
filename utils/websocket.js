@@ -16,7 +16,7 @@ function startWebSocketServer(server) {
 
       if (data.command && clients[data.deviceId]) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
-        clients[data.deviceId].send(message);
+        clients[data.deviceId].send(data.command);
       } else {
         console.log(`Invalid command or device ID: ${data}`);
       }
