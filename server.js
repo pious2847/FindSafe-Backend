@@ -10,13 +10,12 @@ const bodyParser = require('body-parser');
 const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const http = require('http');  // Add this line
-
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const {startWebSocketServer} = require('./utils/websocket');  // Add this line
 
 const app = express();
-const server = http.createServer(app);
-startWebSocketServer(server);
+const server = http.createServer(app);  // Add this line
+startWebSocketServer(server)
 
 
 // Use MongoStore as session store
