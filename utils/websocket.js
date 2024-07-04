@@ -8,8 +8,7 @@ function startWebSocketServer(port) {
   wss.on('connection', (ws, req) => {
     const deviceId = req.url.slice(1);
     clients[deviceId] = ws;
-    console.log(  `Device ${deviceId} connected`)
-
+    console.log(`Device ${deviceId} connected`);
 
     ws.on('message', (message) => {
       const data = JSON.parse(message);
@@ -22,17 +21,20 @@ function startWebSocketServer(port) {
         console.log(`Invalid command or device ID: ${data}`);
       }
     });
+
     ws.on('close', () => {
+      console.log(`Device ${deviceId} disconnected`);
       delete clients[deviceId];
     });
   });
 
-  console.log(`WebSocket server is running on ws://https://find-safe-frontend.vercel.app/:${port}`);
+  console.log(`WebSocket server is running on ws://localhost:${port}`);
 }
+
 function sendCommandToDevice(deviceId, command) {
-  const device = deviceConnections.get(deviceId);
-  
-  console.log(`Received command from device ${command}`)
+  const device = clients[deviceId];
+
+  console.log(`Received command to send to device ${deviceId}: ${command}`);
   if (device) {
     device.send(JSON.stringify({ command }));
     return true;
@@ -41,11 +43,7 @@ function sendCommandToDevice(deviceId, command) {
 }
 
 function getConnectedDevices() {
-  return Array.from(deviceConnections.keys());
+  return Object.keys(clients);
 }
 
-
-module.exports = { startWebSocketServer , sendCommandToDevice,
-  getConnectedDevices};
-
-
+module.exports = { startWebSocketServer, sendCommandToDevice, getConnectedDevices };
