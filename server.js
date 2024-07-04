@@ -14,7 +14,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const {startWebSocketServer} = require('./utils/websocket');  // Add this line
 
 const app = express();
-const PORT = 8000;
+const PORT = 3000;
 startWebSocketServer(PORT);
 
 // Use MongoStore as session store
