@@ -1,48 +1,29 @@
-// websocket.js
-
 const WebSocket = require('ws');
 
-let wss;
-const deviceConnections = new Map();
+function startWebSocketServer(port) {
+  const wss = new WebSocket.Server({ port });
 
-function setupWebSocket(server) {
-  wss = new WebSocket.Server({ server });
+  let clients = {};
 
   wss.on('connection', (ws, req) => {
-    const deviceId = req.url.slice(1); // Remove the leading '/'
-    deviceConnections.set(deviceId, ws);
-
-    console.log(`Device ${deviceId} connected`);
-
-    ws.on('close', () => {
-      deviceConnections.delete(deviceId);
-      console.log(`Device ${deviceId} disconnected`);
-    });
+    const deviceId = req.url.slice(1);
+    clients[deviceId] = ws;
+    console.log(  `Device ${deviceId} connected`)
 
     ws.on('message', (message) => {
-      console.log(`Received message from device ${deviceId}: ${message}`);
-      // Handle incoming messages if needed
+      console.log( `${message}`)
+      const data = JSON.parse(message);
+      if (data.command && clients[data.deviceId]) {
+        clients[data.deviceId].send(message);
+      }
+    });
+
+    ws.on('close', () => {
+      delete clients[deviceId];
     });
   });
+
+  console.log(`WebSocket server is running on ws://localhost:${port}`);
 }
 
-function sendCommandToDevice(deviceId, command) {
-  const device = deviceConnections.get(deviceId);
-  
-  console.log(`Received command from device ${command}`)
-  if (device) {
-    device.send(JSON.stringify({ command }));
-    return true;
-  }
-  return false;
-}
-
-function getConnectedDevices() {
-  return Array.from(deviceConnections.keys());
-}
-
-module.exports = {
-  setupWebSocket,
-  sendCommandToDevice,
-  getConnectedDevices
-};
+module.exports = { startWebSocketServer };
