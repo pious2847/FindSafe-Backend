@@ -23,7 +23,7 @@ function startWebSocketServer(port) {
     });
   });
 
-  console.log(`WebSocket server is running on ws://localhost:${port}`);
+  console.log(`WebSocket server is running on ws://https://find-safe-frontend.vercel.app/:${port}`);
 }
 
 module.exports = { startWebSocketServer };

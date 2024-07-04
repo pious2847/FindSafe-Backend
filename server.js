@@ -11,10 +11,9 @@ const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const http = require('http');  // Add this line
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const {startWebSocketServer} = require('./utils/websocket');  // Add this line
+const {setupWebSocket} = require('./utils/websocket');  // Add this line
 
 const app = express();
-
 const PORT = 3000;
 startWebSocketServer(PORT);
 
@@ -85,7 +84,7 @@ process.on("uncaughtException", (err) => {
   process.exit(1);
 });
 
-
+startServer();
 
 // Function to handle server and database connections
 async function startServer() {
@@ -93,7 +92,7 @@ async function startServer() {
  
   try {
     // Start the HTTP server (which also starts the WebSocket server)
-    server.listen(PORT, (error) => {
+    app.listen(PORT, (error) => {
       if (error) {
         console.log(error);
       } else {
@@ -107,7 +106,6 @@ async function startServer() {
   }
 }
 
-startServer();
 // ===============Handling UnhandledRejection======================//
 
 process.on("unhandledRejection", (err) => {
