@@ -28,7 +28,7 @@ function startWebSocketServer(server) {
     });
   });
 
-  console.log(`WebSocket server is running on ws://localhost:${port}`);
+  console.log(`WebSocket server is running on ${server}`);
 }
 
 function sendCommandToDevice(deviceId, command) {
