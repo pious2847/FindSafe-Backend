@@ -17,7 +17,7 @@ function startWebSocketServer(server) {
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
         try {
-          await clients[data.deviceId].send(message);
+          ws.send(message);
           console.log(`Command successfully sent to ${data.deviceId}`);
         } catch (error) {
           console.error(`Failed to send command to ${data.deviceId}: ${error.message}`);
