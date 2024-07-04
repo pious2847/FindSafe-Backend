@@ -11,7 +11,7 @@ const MongoStore = require('connect-mongo');
 const cors = require('cors');
 const http = require('http');  // Add this line
 const { createProxyMiddleware } = require('http-proxy-middleware');
-const {setupWebSocket} = require('./utils/websocket');  // Add this line
+const {startWebSocketServer} = require('./utils/websocket');  // Add this line
 
 const app = express();
 const PORT = 3000;
