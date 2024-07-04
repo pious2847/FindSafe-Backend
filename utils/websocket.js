@@ -10,14 +10,18 @@ function startWebSocketServer(port) {
     clients[deviceId] = ws;
     console.log(  `Device ${deviceId} connected`)
 
+
     ws.on('message', (message) => {
-      console.log( `${message}`)
       const data = JSON.parse(message);
+      console.log(`Received message from ${deviceId}:`, data);
+
       if (data.command && clients[data.deviceId]) {
+        console.log(`Sending command to ${data.deviceId}: ${data.command}`);
         clients[data.deviceId].send(message);
+      } else {
+        console.log(`Invalid command or device ID: ${data}`);
       }
     });
-
     ws.on('close', () => {
       delete clients[deviceId];
     });
@@ -25,5 +29,23 @@ function startWebSocketServer(port) {
 
   console.log(`WebSocket server is running on ws://https://find-safe-frontend.vercel.app/:${port}`);
 }
+function sendCommandToDevice(deviceId, command) {
+  const device = deviceConnections.get(deviceId);
+  
+  console.log(`Received command from device ${command}`)
+  if (device) {
+    device.send(JSON.stringify({ command }));
+    return true;
+  }
+  return false;
+}
 
-module.exports = { startWebSocketServer };
+function getConnectedDevices() {
+  return Array.from(deviceConnections.keys());
+}
+
+
+module.exports = { startWebSocketServer , sendCommandToDevice,
+  getConnectedDevices};
+
+
