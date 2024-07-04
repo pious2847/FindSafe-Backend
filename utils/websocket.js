@@ -13,14 +13,21 @@ function startWebSocketServer(server) {
     ws.on('message', async (message) => {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
-
+    
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
-       await clients[data.deviceId].send(message);
+        try {
+          await clients[data.deviceId].send(message);
+          console.log(`Command successfully sent to ${data.deviceId}`);
+        } catch (error) {
+          console.error(`Failed to send command to ${data.deviceId}: ${error.message}`);
+          // Handle the error as needed
+        }
       } else {
         console.log(`Invalid command or device ID: ${data}`);
       }
     });
+    
 
     ws.on('close', () => {
       console.log(`Device ${deviceId} disconnected`);
