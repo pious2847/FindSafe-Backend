@@ -15,7 +15,7 @@ const {startWebSocketServer} = require('./utils/websocket');  // Add this line
 
 const app = express();
 const PORT = 3000;
-startWebSocketServer(PORT);
+startWebSocketServer(app);
 
 // Use MongoStore as session store
 const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/';
