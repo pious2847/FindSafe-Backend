@@ -1,57 +1,65 @@
-const WebSocket = require('ws');
+const WebSocket = require("ws");
 
 function startWebSocketServer(server) {
   const wss = new WebSocket.Server({ server });
 
   let clients = {};
 
-  wss.on('connection', (ws, req) => {
+  wss.on("connection", (ws, req) => {
     const deviceId = req.url.slice(1);
     clients[deviceId] = {
       ws: ws,
       connectedAt: new Date(),
-      ip: req.socket.remoteAddress
+      ip: req.socket.remoteAddress,
     };
     console.log(`Device ${deviceId} connected`);
 
-    ws.on('message', async (message) => {
+    ws.on("message", async (message) => {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
       const connectionInfo = getConnectedDevices();
-      console.log(`Total Established Connections: ${connectionInfo}`);
+      console.log("Connected Devices:");
+      connectionInfo.devices.forEach((device) => {
+        console.log(
+          `- Device ID: ${device.deviceId}, Connected At: ${device.connectedAt}, IP: ${device.ip}, Is Alive: ${device.isAlive}`
+        );
+      });
 
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
         try {
-           ws.send(message);
+          ws.send(message);
           console.log(`Command successfully sent to ${data.deviceId}`);
         } catch (error) {
-          console.error(`Failed to send command to ${data.deviceId}: ${error.message}`);
+          console.error(
+            `Failed to send command to ${data.deviceId}: ${error.message}`
+          );
           // Handle the error as needed
         }
       } else {
         console.log(`Invalid command or device ID: ${data}`);
       }
     });
-    
 
-    ws.on('close', () => {
+    ws.on("close", () => {
       console.log(`Device ${deviceId} disconnected`);
       delete clients[deviceId];
     });
   });
 
   function getConnectedDevices() {
-    const connectedDevices = Object.entries(clients).map(([deviceId, client]) => ({
-      deviceId,
-      connectedAt: client.connectedAt,
-      ip: client.ip,
-      isAlive: client.ws.readyState === WebSocket.OPEN
-    }));
-    
+    const connectedDevices = Object.entries(clients).map(
+      ([deviceId, client]) => ({
+        deviceId,
+        connectedAt: client.connectedAt,
+        ip: client.ip,
+        isAlive: client.ws.readyState === WebSocket.OPEN,
+      })
+    );
+
     return {
       devices: connectedDevices,
-      count: connectedDevices.length
+      count: connectedDevices.length,
     };
   }
 
@@ -73,4 +81,8 @@ function getConnectedDevices() {
   return Object.keys(clients);
 }
 
-module.exports = { startWebSocketServer, sendCommandToDevice, getConnectedDevices };
+module.exports = {
+  startWebSocketServer,
+  sendCommandToDevice,
+  getConnectedDevices,
+};
