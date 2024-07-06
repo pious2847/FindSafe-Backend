@@ -7,7 +7,11 @@ function startWebSocketServer(server) {
 
   wss.on('connection', (ws, req) => {
     const deviceId = req.url.slice(1);
-    clients[deviceId] = ws;
+    clients[deviceId] = {
+      ws: ws,
+      connectedAt: new Date(),
+      ip: req.socket.remoteAddress
+    };
     console.log(`Device ${deviceId} connected`);
 
     ws.on('message', async (message) => {
