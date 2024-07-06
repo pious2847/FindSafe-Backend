@@ -18,7 +18,7 @@ function startWebSocketServer(server) {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
       const totalestablishedcon =  getConnectedDevices();
-      console.log(`Total Established Connections ${totalestablishedcon}`);
+      console.log(`Total Established Connections ${JSON.parse(totalestablishedcon)}`);
 
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
