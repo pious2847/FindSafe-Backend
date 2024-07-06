@@ -12,6 +12,7 @@ function startWebSocketServer(server) {
       connectedAt: new Date(),
       ip: req.socket.remoteAddress,
     };
+    
     console.log(`Device ${deviceId} connected`);
 
     ws.on("message", async (message) => {
@@ -28,7 +29,11 @@ function startWebSocketServer(server) {
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
         try {
-          ws.send(message);
+          wss.clients.forEach(function each(client) {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(message);
+            }
+          });
           console.log(`Command successfully sent to ${data.deviceId}`);
         } catch (error) {
           console.error(
