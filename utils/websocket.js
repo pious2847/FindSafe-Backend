@@ -17,8 +17,8 @@ function startWebSocketServer(server) {
     ws.on('message', async (message) => {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
-      const totalestablishedcon =  getConnectedDevices();
-      console.log(`Total Established Connections ${JSON.parse(totalestablishedcon)}`);
+      const connectionInfo = getConnectedDevices();
+      console.log(`Total Established Connections: ${connectionInfo}`);
 
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
@@ -42,12 +42,17 @@ function startWebSocketServer(server) {
   });
 
   function getConnectedDevices() {
-    return Object.entries(clients).map(([deviceId, client]) => ({
+    const connectedDevices = Object.entries(clients).map(([deviceId, client]) => ({
       deviceId,
       connectedAt: client.connectedAt,
       ip: client.ip,
       isAlive: client.ws.readyState === WebSocket.OPEN
     }));
+    
+    return {
+      devices: connectedDevices,
+      count: connectedDevices.length
+    };
   }
 
   console.log(`WebSocket server is running on ${server}`);
