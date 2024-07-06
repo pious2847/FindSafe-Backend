@@ -13,11 +13,13 @@ function startWebSocketServer(server) {
     ws.on('message', async (message) => {
       const data = JSON.parse(message);
       console.log(`Received message from ${deviceId}:`, data);
-    
+      const totalestablishedcon =  getConnectedDevices();
+      console.log(`Total Established Connections ${totalestablishedcon}`);
+
       if (data.command && data.deviceId) {
         console.log(`Sending command to ${data.deviceId}: ${data.command}`);
         try {
-          await ws.send(message);
+           ws.send(message);
           console.log(`Command successfully sent to ${data.deviceId}`);
         } catch (error) {
           console.error(`Failed to send command to ${data.deviceId}: ${error.message}`);
@@ -34,6 +36,15 @@ function startWebSocketServer(server) {
       delete clients[deviceId];
     });
   });
+
+  function getConnectedDevices() {
+    return Object.entries(clients).map(([deviceId, client]) => ({
+      deviceId,
+      connectedAt: client.connectedAt,
+      ip: client.ip,
+      isAlive: client.ws.readyState === WebSocket.OPEN
+    }));
+  }
 
   console.log(`WebSocket server is running on ${server}`);
 }
