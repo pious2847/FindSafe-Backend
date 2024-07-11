@@ -279,7 +279,7 @@ router.post("/api/update-location", async (req, res) => {
 
     // Update the device's current location and push the previous location to the history
     device.curretlocation = newLocation._id;
-    if(device.locationHistory.length > 30){
+    if(device.locationHistory.length >= 30){
      device.locationHistory.pop();
      await device.save();
     }
