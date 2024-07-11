@@ -26,7 +26,7 @@ router.get("/api/mobiledevices/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const mobileDevices = await DevicesInfo.find({ user: userId });
+    const mobileDevices = await DevicesInfo.find({ user: userId }).sort({_id: -1});
 
     // console.log(mobileDevices);
     res.status(200).json({ mobileDevices });
@@ -279,6 +279,10 @@ router.post("/api/update-location", async (req, res) => {
 
     // Update the device's current location and push the previous location to the history
     device.curretlocation = newLocation._id;
+    if(device.locationHistory.length > 30){
+     device.locationHistory.pop();
+     await device.save();
+    }
     device.locationHistory.push(device.curretlocation);
     await device.save();
 
