@@ -279,8 +279,8 @@ router.post("/api/update-location", async (req, res) => {
 
     // Update the device's current location and push the previous location to the history
     device.curretlocation = newLocation._id;
-    const  currentlochiscount = device.locationHistory.length();
-    
+    const  currentlochiscount = device.locationHistory.length;
+
     if( currentlochiscount >= 30){
      device.locationHistory.shift();
     }
