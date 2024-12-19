@@ -26,7 +26,7 @@ router.get("/api/mobiledevices/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
 
-    const mobileDevices = await DevicesInfo.find({ user: userId }).sort({ timestamp: -1 });
+    const mobileDevices = await DevicesInfo.find({ user: userId }).sort({ _id: -1 });
 
     // console.log(mobileDevices);
     res.status(200).json({ mobileDevices });
