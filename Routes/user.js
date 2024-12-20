@@ -104,70 +104,41 @@ router.post('/api/signup', async (req, res) => {
   });
 
 router.put('/api/update/:userId', async (req, res) => {
-    try {
-        console.log("the passed data from the req.body",req.body);
-        
-      const userId = req.params.userId;
-      const {username, email,phone, area, houseNo, name, contact} = req.body;
+  try {
+    const userId = req.params.userId;
 
-      const user =  await User.findOne({_id: userId});
+    const updateFields = {};
 
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-     
-      if(username){
-        user.name = username;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Username updated sucessfully', user:user, token: token})
+    // Only include fields present in the request body
+    if (req.body.username) updateFields.name = req.body.username;
+    if (req.body.phone) updateFields.phone = req.body.phone;
+    if (req.body.addressinfo.area) updateFields['addressinfo.area'] = req.body.addressinfo.area;
+    if (req.body.addressinfo.houseNo) updateFields['addressinfo.houseNo'] = req.body.addressinfo.houseNo;
+    if (req.body.emergencycontact.name) updateFields['emergencycontact.name'] = req.body.emergencycontact.name;
+    if (req.body.emergencycontact.contact) updateFields['emergencycontact.contact'] = req.body.emergencycontact.contact;
 
-      }else if(email){
-        user.email = email;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Email updated sucessfully', user:user, token: token})
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateFields },
+      { new: true, runValidators: true } // Return updated document and validate
+    );
 
-      }else if(phone){
-        user.phone = phone;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Phone updated sucessfully', user:user, token: token})
-
-      }else if(area){
-        user.addressinfo.area = area;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Area updated sucessfully', user:user, token: token})
-
-      }else if(houseNo){
-        user.addressinfo.houseNo = houseNo;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'House No updated sucessfully', user:user, token: token})
-
-      }else if(name){
-        user.emergencycontact.name = name;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Emegency info updated sucessfully', user:user, token: token})
-
-      }else if(contact){
-        user.emergencycontact.contact = contact;
-        await user.save();
-        const token = generateToken(user);
-      res.status(200).send({message: 'Emegency Contact updated sucessfully', user:user, token: token})
-
-      }else{
-
-        res.status(500).json({ error: 'Server error' });
-      } 
-
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Server error' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
     }
-  });
+
+    const token = generateToken(user); // Generate a new token if needed
+
+    res.status(200).json({
+      message: 'User updated successfully',
+      user,
+      token,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 router.post('/api/authenticate-account/:userId', async(req, res)=>{
 try {
