@@ -105,6 +105,8 @@ router.post('/api/signup', async (req, res) => {
 
 router.put('/api/update/:userId', async (req, res) => {
     try {
+        console.log("the passed data from the req.body",req.body);
+        
       const userId = req.params.userId;
       const {username, email,phone, area, houseNo, name, contact} = req.body;
 
