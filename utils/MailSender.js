@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const PasswordReset = require("../models/utils_models/PasswordReset");
-const Users = require("../models/models.user");
+const Users = require("../models/users");
 const axios = require("axios");
 const { generateOTP } = require("./codesGen");
 const { generateAccountVerification, generatePasswordResetConfirmation } = require("./messages");
