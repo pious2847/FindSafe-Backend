@@ -77,7 +77,7 @@ const generatePasswordResetConfirmation = (user) => {
   `;
 };
 
-const generateLostModeNotification = (user, device,) => {
+const generateLostModeNotification = (user, device, activationCode) => {
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -99,6 +99,7 @@ const generateLostModeNotification = (user, device,) => {
         <h3 style="margin-top: 0; color: #2c3e50;">Device Details:</h3>
         <p><strong>Device Name:</strong> ${device.devicename}</p>
         <p><strong>Model Number:</strong> ${device.modelNumber}</p>
+        <p><strong>Activation Code:</strong> <span style="background-color: #e74c3c; color: white; padding: 5px 10px; border-radius: 3px;">${activationCode}</span></p>
     </div>
 
     <p><strong>What happens now?</strong></p>

@@ -60,6 +60,55 @@ const deviceController = {
             res.status(500).json({ message: "An error occurred: " + error.message });
         }
     },
+    async registerNewDevice(req, res) {
+        try {
+            const { userId, devicename, modelNumber } = req.params;
+
+            let deviceimage = "";
+            const user = await User.findById(userId);
+
+            if (!user) {
+                return res
+                    .status(400)
+                    .json({ message: "User not Found, please login" });
+            }
+
+            const deviceExists = await DevicesInfo.findOne({
+                devicename: devicename,
+            });
+
+            const deciveimgurl = await MobileDevice.findOne({
+                devicename: devicename,
+            });
+
+            if (deciveimgurl) {
+                deviceimage = deciveimgurl.imageUrl;
+            }
+            if (!deciveimgurl) {
+                deviceimage =
+                    "https://static.vecteezy.com/system/resources/previews/002/249/888/large_2x/illustration-of-phone-screen-icon-free-vector.jpg";
+            }
+
+            const device = new DevicesInfo({
+                user: userId,
+                devicename: devicename,
+                modelNumber: modelNumber,
+                image: deviceimage,
+            });
+
+            await device.save();
+
+            user.devices.push(device._id);
+
+            user.save();
+
+            res
+                .status(200)
+                .json({ message: "Location added successfully", deviceId: device._id });
+        } catch (error) {
+            res.status(500).json({ error: "An error occurred: " + error.message });
+        }
+    },
     async updateDeviceMode(req, res) {
         const { userId, deviceId } = req.params;
         const { mode } = req.body;
@@ -108,16 +157,18 @@ const deviceController = {
             // Handle email notifications
             try {
                 if (mode === 'disable') {
+                    // Generate random activation code for lost mode
+                    const activationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+                    device.activationCode = activationCode;
+                    await device.save();
 
-                    const message = generateLostModeNotification(user, device,);
-                    await Promise.all([
-                        sendVerificationEmail(user.email, user, 'System Secured Alert', res, `${mode} mode activated successfully`),
-                        sendEmail(user.email, 'System Alert Notification', message)
-                    ]);
+                    const message = generateLostModeNotification(user, device, activationCode);
+                    await sendEmail(user.email, 'System Alert Notification', message)
                 } else {
                     const message = generateDeviceFoundNotification(user, device);
                     await sendEmail(user.email, 'System Alert Notification', message);
                 }
+                
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
                 // Continue with response even if email fails
@@ -140,7 +191,7 @@ const deviceController = {
             });
         }
     },
-    
+
 }
 
 module.exports = deviceController;

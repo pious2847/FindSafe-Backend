@@ -35,12 +35,6 @@ router.get("/api/devices/:deviceId/mode", async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
-
-// Update device mode
-router.post("/api/devicemode/:userId/:deviceId", deviceController.updateDeviceMode);
-
-router.post("/api/mobiledevices", deviceController.createDevice);
-
 // Get recent location history for a device
 router.get("/api/mobiledevices/:deviceId/locations", async (req, res) => {
   const deviceId = req.params.deviceId;
@@ -64,59 +58,11 @@ router.get("/api/mobiledevices/:deviceId/locations", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch location history" });
   }
 });
-
-// api/register-device/:userId/:devicename/:modelNumber
-router.post(
-  "/api/register-device/:userId/:devicename/:modelNumber",
-  async (req, res) => {
-    try {
-      const { userId, devicename, modelNumber } = req.params;
-
-      let deviceimage = "";
-      const user = await User.findById(userId);
-
-      if (!user) {
-        return res
-          .status(400)
-          .json({ message: "User not Found, please login" });
-      }
-
-      const deviceExists = await DevicesInfo.findOne({
-        devicename: devicename,
-      });
-
-      const deciveimgurl = await MobileDevice.findOne({
-        devicename: devicename,
-      });
-
-      if (deciveimgurl) {
-        deviceimage = deciveimgurl.imageUrl;
-      }
-      if (!deciveimgurl) {
-        deviceimage =
-          "https://static.vecteezy.com/system/resources/previews/002/249/888/large_2x/illustration-of-phone-screen-icon-free-vector.jpg";
-      }
-
-      const device = new DevicesInfo({
-        user: userId,
-        devicename: devicename,
-        modelNumber: modelNumber,
-        image: deviceimage,
-      });
-
-      await device.save();
-
-      user.devices.push(device._id);
-
-      user.save();
-
-      res
-        .status(200)
-        .json({ message: "Location added successfully", deviceId: device._id });
-    } catch (error) {
-      res.status(500).json({ error: "An error occurred: " + error.message });
-    }
-  }
+// Update device mode
+router.post("/api/devicemode/:userId/:deviceId", deviceController.updateDeviceMode);
+router.post("/api/mobiledevices", deviceController.createDevice);
+router.post("/api/register-device/:userId/:devicename/:modelNumber",
+  deviceController.registerNewDevice
 );
 
 // Register device location
