@@ -114,10 +114,10 @@ const deviceController = {
         const { mode } = req.body;
 
         try {
-            cosole.log("updateDeviceMode", mode);
-            cosole.log("userId", userId);
-            cosole.log("deviceId", deviceId);
-            
+            console.log("updateDeviceMode", mode);
+            console.log("userId", userId);
+            console.log("deviceId", deviceId);
+
             // Validate input parameters
             if (!userId || !deviceId || !mode) {
                 return res.status(400).json({
