@@ -156,7 +156,7 @@ const deviceController = {
 
             // Handle email notifications
             try {
-                if (mode === 'disable') {
+                if (mode === 'disabled') {
                     // Generate random activation code for lost mode
                     const activationCode = Math.random().toString(36).substring(2, 8).toUpperCase();
                     device.activationCode = activationCode;
@@ -168,7 +168,7 @@ const deviceController = {
                     const message = generateDeviceFoundNotification(user, device);
                     await sendEmail(user.email, 'System Alert Notification', message);
                 }
-                
+
             } catch (emailError) {
                 console.error('Email sending failed:', emailError);
                 // Continue with response even if email fails
