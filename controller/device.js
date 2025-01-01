@@ -114,6 +114,10 @@ const deviceController = {
         const { mode } = req.body;
 
         try {
+            cosole.log("updateDeviceMode", mode);
+            cosole.log("userId", userId);
+            cosole.log("deviceId", deviceId);
+            
             // Validate input parameters
             if (!userId || !deviceId || !mode) {
                 return res.status(400).json({
@@ -122,7 +126,7 @@ const deviceController = {
             }
 
             // Validate mode value
-            const validModes = ['active', 'disable'];
+            const validModes = ['active', 'disabled'];
             if (!validModes.includes(mode)) {
                 return res.status(400).json({
                     message: "Invalid mode value"
