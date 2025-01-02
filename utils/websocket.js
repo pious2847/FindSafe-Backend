@@ -14,6 +14,7 @@ function startWebSocketServer(server) {
     ws.on("message", (message) => {
       const data = JSON.parse(message);
       console.log(`Received from ${deviceId}:`, data);
+      sendCommandToDevice(data.deviceId, data.command);
     });
 
     ws.on("close", () => {
@@ -28,6 +29,7 @@ function startWebSocketServer(server) {
 function sendCommandToDevice(deviceId, command) {
   if (clients[deviceId] && clients[deviceId].ws.readyState === WebSocket.OPEN) {
     clients[deviceId].ws.send(JSON.stringify({ command }));
+    console.log(`Sent command to device ${deviceId}: ${command}`);
     return true;
   }
   return false;
