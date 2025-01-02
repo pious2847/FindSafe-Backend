@@ -1,12 +1,11 @@
 
 const MobileDevice = require("../models/utils_models/mobile");
 const DevicesInfo = require("../models/deviceinfo");
-const Location = require("../models/locations");
 const User = require("../models/users");
-const bcrypt = require('bcrypt');
-const { sendEmail, sendVerificationEmail } = require('../utils/MailSender');
+const { sendEmail } = require('../utils/MailSender');
 const { sendCommandToDevice, getConnectedDevices } = require('../utils/websocket');
-const { generateAccountVerification, generateLostModeNotification, generateDeviceFoundNotification } = require("../utils/messages");
+const { generateLostModeNotification, generateDeviceFoundNotification } = require("../utils/messages");
+const PendingCommands = require("../models/utils_models/awaitingcommands");
 
 const deviceController = {
     async getDevices(req, res) {
@@ -73,9 +72,6 @@ const deviceController = {
                     .json({ message: "User not Found, please login" });
             }
 
-            const deviceExists = await DevicesInfo.findOne({
-                devicename: devicename,
-            });
 
             const deciveimgurl = await MobileDevice.findOne({
                 devicename: devicename,
@@ -114,9 +110,7 @@ const deviceController = {
         const { mode } = req.body;
 
         try {
-            console.log("updateDeviceMode", mode);
-            console.log("userId", userId);
-            console.log("deviceId", deviceId);
+
 
             // Validate input parameters
             if (!userId || !deviceId || !mode) {
@@ -166,8 +160,22 @@ const deviceController = {
                     device.activationCode = activationCode;
                     await device.save();
 
-                    const message = generateLostModeNotification(user, device, activationCode);
-                    await sendEmail(user.email, 'System Alert Notification', message)
+                    await Promise.all(async () => {
+                        await sendCommandToDevice(deviceId, 'secure_device')
+
+                        const message = generateLostModeNotification(user, device, activationCode);
+                        await sendEmail(user.email, 'System Alert Notification', message)
+
+                        const pendingcommand = new PendingCommands({
+                            deviceId: device.id,
+                            command: 'secure_device',
+                            isexecuted: false
+                        });
+
+                        await pendingcommand.save();
+
+                    })
+
                 } else {
                     const message = generateDeviceFoundNotification(user, device);
                     await sendEmail(user.email, 'System Alert Notification', message);
@@ -195,6 +203,86 @@ const deviceController = {
             });
         }
     },
+    async getDeviceCurrentMode(req, res) {
+        try {
+            const device = await DevicesInfo.findById(req.params.deviceId)
+                .select("mode activationCode devicename modelNumber")
+                .populate("user", "name email");
+
+            if (!device) {
+                return res.status(404).json({ error: "Device not found" });
+            }
+            res.json({
+                mode: device.mode,
+                activationCode: device.activationCode,
+                deviceName: device.devicename,
+                modelNumber: device.modelNumber,
+                user: device.user,
+            });
+        } catch (error) {
+            console.error(err);
+            res.status(500).json({ error: "Server error" });
+        }
+    },
+    async activateAndUnlockDevice(req, res) {
+        const { deviceId } = req.params.deviceId;
+        const { activationCode } = req.body;
+
+        try {
+            const device = DevicesInfo.findById(deviceId);
+
+            if (!device) {
+                res.status(404).json({ error: "Device not found" });
+            }
+            if (activationCode === device.activationCode) {
+                device.mode = 'active';
+                device.activationCode = '';
+                await device.save();
+
+                res
+                    .status(200)
+                    .json({ message: "Activation completed sucessfully", isValid: true });
+            } else {
+                res
+                    .status(400)
+                    .json({ message: "Invalid Activation code", isValid: false });
+            }
+        } catch (error) {
+            res
+                .status(500)
+                .json({ message: `Internal sever Error ${error}`, isValid: false });
+        }
+    },
+    async deleteDevice(req, res) {
+        const deviceId = req.params.deviceId;
+
+        try {
+            const device = await DevicesInfo.findOne({ _id: deviceId });
+
+            if (!device) {
+                res.send(404).json({ message: "Device not found" });
+            }
+            await DevicesInfo.findByIdAndDelete(deviceId);
+            res.status(200).json({ message: "Device deleted Sucessfully" });
+        } catch (error) {
+            res
+                .status(500)
+                .json({ message: `An error occurred while deleting ${error}  ` });
+        }
+    },
+    async triggerAlarm(req, res) {
+        const { deviceId } = req.params;
+
+        if (sendCommandToDevice(deviceId, 'play_alarm')) {
+            res.json({ success: true, message: 'Alarm command sent successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Device not found or not connected' });
+        }
+    },
+    async getConnectedDevice(req, res) {
+        const devices = getConnectedDevices();
+        res.status(200).json({ success: true, devices });
+    }
 
 }
 

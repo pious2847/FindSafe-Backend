@@ -60,7 +60,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
 const userRouter = require('./Routes/user');
-const router = require('./Routes/router');
+const locationRouter = require('./Routes/location');
+const devicerouter = require('./Routes/devices');
+const createRateLimitMiddleware = require('./middleware/ratelimitter');
 
 // measuring the speed of site load
 app.use((req, res, next) => {
@@ -72,9 +74,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Create and apply the rate limiting middleware to all routes
+const rateLimitMiddleware = createRateLimitMiddleware({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50 // Limit each IP to 100 requests per 15 minutes
+});
+app.use(rateLimitMiddleware);
+
+
 // settings for using routes
 app.use(userRouter);
-app.use(router);
+app.use(locationRouter);
+app.use(devicerouter);
 
 // ===============Handling UncaughtExceptions ======================//
 
@@ -108,7 +119,6 @@ async function startServer() {
 }
 
 // ===============Handling UnhandledRejection======================//
-
 process.on("unhandledRejection", (err) => {
   console.log(err.name, err.message);
   console.log(err);

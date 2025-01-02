@@ -82,7 +82,7 @@ router.post('/api/signup', async (req, res) => {
   
       // Generate a session token (you can use a library like jsonwebtoken for this)
       const sessionToken = generateSessionToken(user._id);
-      const token =  generateToken(user)
+      const token =  await generateToken(user)
   
       // Set session variables
       req.session.userId = user._id;
