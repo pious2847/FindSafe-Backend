@@ -15,8 +15,7 @@ const {startWebSocketServer} = require('./utils/websocket');  // Add this line
 
 const app = express();
 const server = http.createServer(app);  // Add this line
-startWebSocketServer(server)
-
+const webSocketServer = startWebSocketServer(server);
 
 // Use MongoStore as session store
 const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/';
@@ -128,3 +127,4 @@ process.on("unhandledRejection", (err) => {
   });
 });
 
+module.exports = webSocketServer ;

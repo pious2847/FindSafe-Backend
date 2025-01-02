@@ -3,91 +3,75 @@ const WebSocket = require("ws");
 function startWebSocketServer(server) {
   const wss = new WebSocket.Server({ server });
 
-  let clients = {};
+  const clients = {}; // Keep track of connected clients
 
   wss.on("connection", (ws, req) => {
-    const deviceId = req.url.slice(1);
+    const deviceId = req.url.slice(1); // Extract device ID from URL
     clients[deviceId] = {
-      ws: ws,
+      ws,
       connectedAt: new Date(),
       ip: req.socket.remoteAddress,
     };
-    
+
     console.log(`Device ${deviceId} connected`);
 
-    ws.on("message", async (message) => {
-      const data = JSON.parse(message);
-      console.log(`Received message from ${deviceId}:`, data);
-      const connectionInfo = getConnectedDevices();
-      console.log("Connected Devices:");
-      connectionInfo.devices.forEach((device) => {
-        console.log(
-          `- Device ID: ${device.deviceId}, Connected At: ${device.connectedAt}, IP: ${device.ip}, Is Alive: ${device.isAlive}`
-        );
-      });
+    // Listen for messages from the client
+    ws.on("message", (message) => {
+      try {
+        const data = JSON.parse(message);
+        console.log(`Received message from ${deviceId}:`, data);
 
-      if (data.command && data.deviceId) {
-        console.log(`Sending command to ${data.deviceId}: ${data.command}`);
-        try {
-          wss.clients.forEach(function each(client) {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(message);
-            }
-          });
-          console.log(`Command successfully sent to ${data.deviceId}`);
-        } catch (error) {
-          console.error(
-            `Failed to send command to ${data.deviceId}: ${error.message}`
-          );
-          // Handle the error as needed
+        if (data.command && data.targetDeviceId) {
+          sendCommandToDevice(data.targetDeviceId, data.command);
+        } else {
+          console.log(`Invalid message format: ${message}`);
         }
-      } else {
-        console.log(`Invalid command or device ID: ${data}`);
+      } catch (error) {
+        console.error(`Error processing message: ${error.message}`);
       }
     });
 
+    // Handle client disconnection
     ws.on("close", () => {
       console.log(`Device ${deviceId} disconnected`);
       delete clients[deviceId];
     });
+
+    // Handle WebSocket errors
+    ws.on("error", (error) => {
+      console.error(`WebSocket error with device ${deviceId}: ${error.message}`);
+    });
   });
 
+  // Function to send a command to a specific device
+  function sendCommandToDevice(deviceId, command) {
+    const client = clients[deviceId];
+    if (client && client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(JSON.stringify({ command }));
+      console.log(`Command "${command}" sent to device ${deviceId}`);
+    } else {
+      console.warn(
+        `Cannot send command to ${deviceId}: Client not connected or WebSocket not open`
+      );
+    }
+  }
+
+  // Function to get a list of connected devices
   function getConnectedDevices() {
-    const connectedDevices = Object.entries(clients).map(
-      ([deviceId, client]) => ({
-        deviceId,
-        connectedAt: client.connectedAt,
-        ip: client.ip,
-        isAlive: client.ws.readyState === WebSocket.OPEN,
-      })
-    );
-
-    return {
-      devices: connectedDevices,
-      count: connectedDevices.length,
-    };
+    return Object.keys(clients).map((deviceId) => ({
+      deviceId,
+      connectedAt: clients[deviceId].connectedAt,
+      ip: clients[deviceId].ip,
+      isAlive: clients[deviceId].ws.readyState === WebSocket.OPEN,
+    }));
   }
 
-  console.log(`WebSocket server is running on ${server}`);
+  console.log("WebSocket server is running");
+
+  return {
+    sendCommandToDevice,
+    getConnectedDevices,
+  };
 }
 
-function sendCommandToDevice(deviceId, command) {
-  const device = clients[deviceId];
-
-  console.log(`Received command to send to device ${deviceId}: ${command}`);
-  if (device) {
-    device.send(JSON.stringify({ command }));
-    return true;
-  }
-  return false;
-}
-
-function getConnectedDevices() {
-  return Object.keys(clients);
-}
-
-module.exports = {
-  startWebSocketServer,
-  sendCommandToDevice,
-  getConnectedDevices,
-};
+module.exports = { startWebSocketServer };

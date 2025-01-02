@@ -1,7 +1,8 @@
 const PendingCommands = require("../models/utils_models/awaitingcommands");
-const { sendCommandToDevice } = require("../utils/websocket");
+// const { sendCommandToDevice } = require("../utils/websocket");
 const DevicesInfo = require("../models/deviceinfo");
 const Location = require("../models/locations");
+const webSocketServer = require("../server");
 
 
 const locationController = {
@@ -86,7 +87,9 @@ const locationController = {
 
             const anypendingCommand = await PendingCommands.findOne({deviceId: device._id});
             if(anypendingCommand){
-                sendCommandToDevice(deviceId, anypendingCommand.command)
+              webSocketServer.sendCommandToDevice(deviceId, anypendingCommand.command)
+
+                // sendCommandToDevice(deviceId, anypendingCommand.command)
                 await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
             }
 

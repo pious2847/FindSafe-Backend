@@ -3,9 +3,10 @@ const MobileDevice = require("../models/utils_models/mobile");
 const DevicesInfo = require("../models/deviceinfo");
 const User = require("../models/users");
 const { sendEmail } = require('../utils/MailSender');
-const { sendCommandToDevice, getConnectedDevices } = require('../utils/websocket');
+// const { sendCommandToDevice, getConnectedDevices } = require('../utils/websocket');
 const { generateLostModeNotification, generateDeviceFoundNotification } = require("../utils/messages");
 const PendingCommands = require("../models/utils_models/awaitingcommands");
+const webSocketServer = require("../server");
 
 const deviceController = {
     async getDevices(req, res) {
@@ -162,7 +163,8 @@ const deviceController = {
 
                     await Promise.all([
                         // First promise: Send command to device
-                        sendCommandToDevice(deviceId, 'secure_device'),
+                        webSocketServer.sendCommandToDevice(deviceId, 'secure_device'),
+                        // sendCommandToDevice(deviceId, 'secure_device'),
                         
                         // Second promise: Send email notification
                         (async () => {
@@ -275,14 +277,14 @@ const deviceController = {
     async triggerAlarm(req, res) {
         const { deviceId } = req.params;
 
-        if (sendCommandToDevice(deviceId, 'play_alarm')) {
+        if (webSocketServer.sendCommandToDevice(deviceId, 'play_alarm')) {
             res.json({ success: true, message: 'Alarm command sent successfully' });
         } else {
             res.status(404).json({ success: false, message: 'Device not found or not connected' });
         }
     },
     async getConnectedDevice(req, res) {
-        const devices = getConnectedDevices();
+        const devices = webSocketServer.getConnectedDevices();
         res.status(200).json({ success: true, devices });
     }
 
