@@ -21,8 +21,8 @@ function startWebSocketServer(server) {
         const data = JSON.parse(message);
         console.log(`Received message from ${deviceId}:`, data);
 
-        if (data.command && data.targetDeviceId) {
-          sendCommandToDevice(data.targetDeviceId, data.command);
+        if (data.command && data.deviceId) {
+          sendCommandToDevice(data.deviceId, data.command);
         } else {
           console.log(`Invalid message format: ${message}`);
         }
