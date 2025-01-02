@@ -6,7 +6,7 @@ const pendingSchema = new mongoose.Schema({
         ref: 'Devices',
     },
     command:{
-        type: string,
+        type: String,
         trim: true,
         required: true,
     },
