@@ -160,21 +160,23 @@ const deviceController = {
                     device.activationCode = activationCode;
                     await device.save();
 
-                    await Promise.all(async () => {
-                        await sendCommandToDevice(deviceId, 'secure_device')
-
-                        const message = generateLostModeNotification(user, device, activationCode);
-                        await sendEmail(user.email, 'System Alert Notification', message)
-
-                        const pendingcommand = new PendingCommands({
+                    await Promise.all([
+                        // First promise: Send command to device
+                        sendCommandToDevice(deviceId, 'secure_device'),
+                        
+                        // Second promise: Send email notification
+                        (async () => {
+                            const message = generateLostModeNotification(user, device, activationCode);
+                            return sendEmail(user.email, 'System Alert Notification', message);
+                        })(),
+                        
+                        // Third promise: Save pending command
+                        new PendingCommands({
                             deviceId: device.id,
                             command: 'secure_device',
                             isexecuted: false
-                        });
-
-                        await pendingcommand.save();
-
-                    })
+                        }).save()
+                    ]);
 
                 } else {
                     const message = generateDeviceFoundNotification(user, device);
