@@ -163,7 +163,8 @@ const deviceController = {
 
                     await Promise.all([
                         // First promise: Send command to device
-                        sendCommandToDevice(deviceId, 'secure_device'),
+                        
+                        sendCommandToDevice({"deviceId":deviceId, command:'secure_device'}),
                         
                         // Second promise: Send email notification
                         (async () => {
@@ -276,7 +277,7 @@ const deviceController = {
     async triggerAlarm(req, res) {
         const { deviceId } = req.params;
 
-        if (sendCommandToDevice(deviceId, 'play_alarm')) {
+        if (sendCommandToDevice({"deviceId":deviceId, command:'play_alarm'})) {
             res.json({ success: true, message: 'Alarm command sent successfully' });
         } else {
             res.status(404).json({ success: false, message: 'Device not found or not connected' });
