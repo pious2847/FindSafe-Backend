@@ -98,7 +98,7 @@ function sendCommandToDevice(message) {
       }
     });
 
-    console.log(`Sent command to device ${data.deviceId}: ${command}`);
+    console.log(`Sent command to device ${data.deviceId}: ${data.command}`);
     return true;
   } catch (error) {
     console.error(`Error sending command to device:`, error);
