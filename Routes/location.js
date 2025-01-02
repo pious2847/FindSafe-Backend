@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const DevicesInfo = require("../models/deviceinfo");
-const Location = require("../models/locations");
 const locationController = require("../controller/location");
 
 

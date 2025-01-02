@@ -1,5 +1,7 @@
 const PendingCommands = require("../models/utils_models/awaitingcommands");
 const { sendCommandToDevice } = require("../utils/websocket");
+const DevicesInfo = require("../models/deviceinfo");
+const Location = require("../models/locations");
 
 
 const locationController = {
