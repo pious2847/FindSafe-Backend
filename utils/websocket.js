@@ -87,9 +87,9 @@ function sendCommandToDevice(message) {
       return false;
     }
 
-    const client = clients[deviceId];
+    const client = clients[data.deviceId];
     if (!client || !client.ws || client.ws.readyState !== WebSocket.OPEN) {
-      console.log(`Device ${deviceId} not connected or not ready`);
+      console.log(`Device ${data.deviceId} not connected or not ready`);
       return false;
     }
     wss.clients.forEach(function each(client) {
