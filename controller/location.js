@@ -86,7 +86,7 @@ const locationController = {
 
             const anypendingCommand = await PendingCommands.findOne({deviceId: device._id});
             if(anypendingCommand){
-              sendCommandToDevice({"deviceId":deviceId, command:anypendingCommand.command}),
+              sendCommandToDevice({deviceId:`${deviceId}`, command:anypendingCommand.command}),
                 await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
             }
 
