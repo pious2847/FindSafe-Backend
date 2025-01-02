@@ -87,8 +87,8 @@ const locationController = {
             const anypendingCommand = await PendingCommands.findOne({deviceId: device._id});
             if(anypendingCommand){
                 sendCommandToDevice(deviceId, anypendingCommand.command)
+                await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
             }
-            await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
 
             res.status(200).json({ message: "Location updated successfully" });
           } catch (error) {
