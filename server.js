@@ -37,6 +37,9 @@ app.use(cookieParser());
 app.use(morgan('tiny'));
 app.use(cors());
 
+// added to trust the proxy
+app.set('trust proxy', 1);
+
 // Setting up http proxy
 app.use('/apis', createProxyMiddleware({
   target: 'http://api.positionstack.com',
