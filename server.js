@@ -27,7 +27,7 @@ try {
 }
 
 // Use MongoStore as session store
-const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/';
+const sessionConnectionUri = process.env.MONGODB_URI || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/';
 
 app.use(session({
   secret: 'Secret_Key',

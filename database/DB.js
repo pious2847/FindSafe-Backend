@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 
 const ConnectDB =  ()=>{
-  const atlasConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
+  const atlasConnectionUri = process.env.MONGODB_URI || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/'
 
     try {
      mongoose.connect( atlasConnectionUri);
