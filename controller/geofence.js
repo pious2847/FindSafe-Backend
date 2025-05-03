@@ -92,6 +92,7 @@ const geofenceController = {
 
       res.status(201).json({ message: "Geofence created successfully", data: newGeofence });
     } catch (error) {
+      console.error("Error creating geofence:", error);
       res.status(500).json({ message: "An error occurred: " + error.message });
     }
   },
