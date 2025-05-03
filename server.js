@@ -2,6 +2,7 @@
 const express = require('express');
 require('dotenv').config();
 const path = require('path');
+const fs = require('fs');
 const compression = require('compression');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
@@ -12,14 +13,23 @@ const cors = require('cors');
 const http = require('http');  // Add this line
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const {startWebSocketServer} = require('./utils/websocket');  // Add this line
+const { initializeFirebaseAdmin } = require('./config/firebase');
+
 
 const app = express();
 const server = http.createServer(app);  // Add this line
 startWebSocketServer(server)
 
+// Initialize Firebase Admin SDK
+try {
+  const firebaseAdmin = initializeFirebaseAdmin();
+  app.locals.firebaseAdmin = firebaseAdmin; 
+} catch (error) {
+  console.error('Failed to initialize Firebase Admin in app.js:', error);
+}
 
 // Use MongoStore as session store
-const sessionConnectionUri = process.env.DBConnectionLink || 'mongodb+srv://abdulhafis2847:pious2847@findsafe.qgtvkt9.mongodb.net/';
+const sessionConnectionUri = process.env.MONGODB_URI;
 
 app.use(session({
   secret: 'Secret_Key',
@@ -55,6 +65,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Configure Express to serve static files from the "public" directory
 app.use(express.static(path.join(__dirname, './public')));
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, './public/uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // custom imports
 require('./database/DB')();
 
@@ -65,6 +81,8 @@ app.set('views', path.join(__dirname, 'views'));
 const userRouter = require('./Routes/user');
 const locationRouter = require('./Routes/location');
 const devicerouter = require('./Routes/devices');
+const geofenceRouter = require('./Routes/geofence');
+const notificationRouter = require('./Routes/notification');
 const createRateLimitMiddleware = require('./middleware/ratelimitter');
 
 // measuring the speed of site load
@@ -89,6 +107,8 @@ app.use(rateLimitMiddleware);
 app.use(userRouter);
 app.use(locationRouter);
 app.use(devicerouter);
+app.use(geofenceRouter);
+app.use(notificationRouter);
 
 // ===============Handling UncaughtExceptions ======================//
 
@@ -104,7 +124,7 @@ startServer();
 // Function to handle server and database connections
 async function startServer() {
   const PORT = process.env.PORT || 8080;
- 
+
   try {
     // Start the HTTP server (which also starts the WebSocket server)
     server.listen(PORT, (error) => {
@@ -114,7 +134,7 @@ async function startServer() {
         console.log(`----Server running on http://localhost:${PORT} ----`);
       }
     });
-      
+
   } catch (err) {
     console.error("Database connection error:", err);
     process.exit(1); // Exit the application with an error code
