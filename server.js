@@ -13,6 +13,8 @@ const cors = require('cors');
 const http = require('http');  // Add this line
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const {startWebSocketServer} = require('./utils/websocket');  // Add this line
+const { initializeFirebaseAdmin } = require('./config/firebase');
+
 
 const app = express();
 const server = http.createServer(app);  // Add this line

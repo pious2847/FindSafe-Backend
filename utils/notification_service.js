@@ -1,9 +1,7 @@
-const admin = require('firebase-admin');
 const NotificationSettings = require('../models/notification_settings');
 const { getAdmin } = require('../config/firebase');
 
 
-const admin = getAdmin();
 
 const notificationService = {
   /**
@@ -17,14 +15,16 @@ const notificationService = {
    */
   async sendPushNotification(userId, notification, data = {}) {
     try {
+      const admin = getAdmin();
+
       // Get user notification settings
       const settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings || !settings.pushNotificationsEnabled || !settings.deviceTokens.length) {
         console.log(`Push notifications disabled or no device tokens for user ${userId}`);
         return { success: false, message: 'Push notifications disabled or no device tokens' };
       }
-      
+
       // Prepare the message
       const message = {
         notification: {
@@ -53,12 +53,12 @@ const notificationService = {
           },
         },
       };
-      
+
       // Send the message
       const response = await admin.messaging().sendMulticast(message);
-      
+
       console.log(`Successfully sent message: ${response.successCount} successful, ${response.failureCount} failed`);
-      
+
       // Handle failed tokens
       if (response.failureCount > 0) {
         const failedTokens = [];
@@ -67,9 +67,9 @@ const notificationService = {
             failedTokens.push(settings.deviceTokens[idx].token);
           }
         });
-        
+
         console.log('List of tokens that caused failures:', failedTokens);
-        
+
         // Remove failed tokens
         if (failedTokens.length > 0) {
           await NotificationSettings.updateOne(
@@ -78,7 +78,7 @@ const notificationService = {
           );
         }
       }
-      
+
       return {
         success: true,
         successCount: response.successCount,
@@ -89,7 +89,7 @@ const notificationService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Send a geofence notification
    * @param {string} userId - The user ID
@@ -100,18 +100,20 @@ const notificationService = {
    */
   async sendGeofenceNotification(userId, geofence, deviceName, isEntry) {
     try {
+      const admin = getAdmin();
+
       // Get user notification settings
       const settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings || !settings.geofenceNotificationsEnabled) {
         console.log(`Geofence notifications disabled for user ${userId}`);
         return { success: false, message: 'Geofence notifications disabled' };
       }
-      
+
       const eventType = isEntry ? 'entered' : 'exited';
       const title = `${deviceName} ${eventType} geofence`;
       const body = `${geofence.name}: ${geofence.description || ''}`;
-      
+
       return await this.sendPushNotification(
         userId,
         { title, body },
@@ -127,7 +129,7 @@ const notificationService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Send a device status notification
    * @param {string} userId - The user ID
@@ -139,17 +141,19 @@ const notificationService = {
    */
   async sendDeviceStatusNotification(userId, deviceId, deviceName, status, details = '') {
     try {
+      const admin = getAdmin();
+
       // Get user notification settings
       const settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings || !settings.deviceStatusNotificationsEnabled) {
         console.log(`Device status notifications disabled for user ${userId}`);
         return { success: false, message: 'Device status notifications disabled' };
       }
-      
+
       const title = `${deviceName} status changed`;
       const body = `${status}${details ? ': ' + details : ''}`;
-      
+
       return await this.sendPushNotification(
         userId,
         { title, body },
@@ -164,7 +168,7 @@ const notificationService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Send a low battery notification
    * @param {string} userId - The user ID
@@ -175,17 +179,19 @@ const notificationService = {
    */
   async sendLowBatteryNotification(userId, deviceId, deviceName, batteryLevel) {
     try {
+      const admin = getAdmin();
+
       // Get user notification settings
       const settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings || !settings.lowBatteryNotificationsEnabled) {
         console.log(`Low battery notifications disabled for user ${userId}`);
         return { success: false, message: 'Low battery notifications disabled' };
       }
-      
+
       const title = 'Low Battery Alert';
       const body = `${deviceName} battery is at ${batteryLevel}%`;
-      
+
       return await this.sendPushNotification(
         userId,
         { title, body },
@@ -200,7 +206,7 @@ const notificationService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Register a device token for push notifications
    * @param {string} userId - The user ID
@@ -211,21 +217,23 @@ const notificationService = {
    */
   async registerDeviceToken(userId, deviceId, token, platform) {
     try {
+      const admin = getAdmin();
+
       // Find or create notification settings
       let settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings) {
         settings = new NotificationSettings({
           userId,
           deviceTokens: [],
         });
       }
-      
+
       // Check if token already exists
-      const tokenExists = settings.deviceTokens.some(device => 
+      const tokenExists = settings.deviceTokens.some(device =>
         device.token === token && device.deviceId === deviceId
       );
-      
+
       if (!tokenExists) {
         // Add the new token
         settings.deviceTokens.push({
@@ -234,18 +242,18 @@ const notificationService = {
           platform,
           createdAt: new Date(),
         });
-        
+
         settings.updatedAt = new Date();
         await settings.save();
       }
-      
+
       return { success: true, message: 'Device token registered successfully' };
     } catch (error) {
       console.error('Error registering device token:', error);
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Unregister a device token
    * @param {string} userId - The user ID
@@ -254,26 +262,28 @@ const notificationService = {
    */
   async unregisterDeviceToken(userId, token) {
     try {
+      const admin = getAdmin();
+
       // Update notification settings
       const result = await NotificationSettings.updateOne(
         { userId },
-        { 
+        {
           $pull: { deviceTokens: { token } },
           $set: { updatedAt: new Date() }
         }
       );
-      
+
       if (result.modifiedCount === 0) {
         return { success: false, message: 'Token not found' };
       }
-      
+
       return { success: true, message: 'Device token unregistered successfully' };
     } catch (error) {
       console.error('Error unregistering device token:', error);
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Update notification settings
    * @param {string} userId - The user ID
@@ -282,20 +292,22 @@ const notificationService = {
    */
   async updateNotificationSettings(userId, settings) {
     try {
+      const admin = getAdmin();
+
       const updateData = {
         ...settings,
         updatedAt: new Date()
       };
-      
+
       // Find or create notification settings
       const result = await NotificationSettings.findOneAndUpdate(
         { userId },
         { $set: updateData },
         { new: true, upsert: true }
       );
-      
-      return { 
-        success: true, 
+
+      return {
+        success: true,
         message: 'Notification settings updated successfully',
         settings: result
       };
@@ -304,7 +316,7 @@ const notificationService = {
       return { success: false, error: error.message };
     }
   },
-  
+
   /**
    * Get notification settings
    * @param {string} userId - The user ID
@@ -312,19 +324,21 @@ const notificationService = {
    */
   async getNotificationSettings(userId) {
     try {
+      const admin = getAdmin();
+
       // Find notification settings
       const settings = await NotificationSettings.findOne({ userId });
-      
+
       if (!settings) {
         // Create default settings
         const defaultSettings = new NotificationSettings({
           userId,
         });
-        
+
         await defaultSettings.save();
         return { success: true, settings: defaultSettings };
       }
-      
+
       return { success: true, settings };
     } catch (error) {
       console.error('Error getting notification settings:', error);
