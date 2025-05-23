@@ -71,7 +71,6 @@ const geofenceController = {
   async createGeofence(req, res) {
     try {
       const { name, description, center, radius, type, deviceId, color } = req.body;
-      console.log("The passed data", req.body);
       // Verify device exists
       const device = await DevicesInfo.findById(deviceId);
       if (!device) {
@@ -92,7 +91,6 @@ const geofenceController = {
 
       res.status(201).json({ message: "Geofence created successfully", data: newGeofence });
     } catch (error) {
-      console.error("Error creating geofence:", error);
       res.status(500).json({ message: "An error occurred: " + error.message });
     }
   },

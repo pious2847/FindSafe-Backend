@@ -1,11 +1,183 @@
 const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const fs = require('fs');
-const path = require('path');
 const { cloudinary } = require('../utils/cloudinary');
+const { sendVerificationEmail, sendForgotPasswordEmail, verifyEmail, verifyPasswordResetOTP, resetPassword } = require('../utils/MailSender');
+const { generateSessionToken } = require('../utils/codesGen');
+
+const generateToken = (user) => {
+  return jwt.sign({ user }, process.env.JWT_SECRET || 'Secret_Key', {
+    expiresIn: '7d',
+  });
+};
 
 const userController = {
+
+  /**
+   * Signup
+   */
+  async signup(req, res) {
+    try {
+      const { username, email, password } = req.body;
+
+      // Input validation
+      if (!username || !email || !password) {
+        return res.status(400).json({ 
+            message: 'Username, email, and password are required',
+            success: false 
+        });
+      }
+
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({ 
+                message: 'Please provide a valid email address',
+                success: false 
+            });
+        }
+
+        // Password strength validation
+        if (password.length < 6) {
+            return res.status(400).json({ 
+                message: 'Password must be at least 6 characters long',
+                success: false 
+            });
+        }
+
+
+      // Check if user with the same email already exists
+      const userExists = await User.findOne({ email: email.toLowerCase() });
+
+      if (userExists) {
+        return res.status(400).json({ message: 'Account with this email already exists', success: false });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create a new user instance
+      const user = new User({
+        name: username,
+        email: email.toLowerCase(),
+        password: hashedPassword,
+        verified: false
+      });
+      // Save the new user to the database
+      await user.save();
+
+      // Send verification email
+      const emailResult = await sendVerificationEmail(
+        user.email, 
+        user, 
+        'Verify Your FindSafe Account',
+        res,
+        'Account created successfully. Verification code sent to your email.'
+      );
+
+      if (emailResult.success) {
+        res.status(200).json({ 
+            message: 'Account created successfully. Verification code sent to your email.',
+            success: true,
+            userId: user._id
+        });
+      } else {
+        res.status(500).json({ 
+            message: 'Account created but failed to send verification email. Please try again.',
+            success: false 
+        });
+      }
+
+
+    } catch (error) {
+      console.error('Signup error:', error);
+      res.status(500).json({ 
+          message: `An error occurred: ${error.message}`,
+          success: false 
+      });
+
+    }
+  },
+  /**
+   * Login
+   */
+  async login(req, res) {
+    try {
+      const { email, password } = req.body;
+
+      // Input validation
+      if (!email || !password) {
+        return res.status(400).json({ 
+            message: 'Email and password are required',
+            success: false 
+        });
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      // Find user by email
+      const user = await User.findOne({ email: email.toLowerCase() });
+
+      if (!user) {
+        return res.status(400).send({ message: "Invalid Email and Password" });
+      }
+
+      // Compare passwords
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        return res.status(400).send({ message: 'Invalid password Entered' });
+      }
+
+      // Generate a session token (you can use a library like jsonwebtoken for this)
+      const sessionToken = generateSessionToken(user._id);
+      const token = await generateToken(user)
+
+      // Set session variables
+      req.session.userId = user._id;
+      req.session.isLoggedIn = true;
+      req.session.token = sessionToken;
+
+      res.status(200).send({
+        success: true,
+        message: 'User logged in successfully',
+        userId: user._id,
+        sessionToken: sessionToken,
+        token: token
+      });
+
+    } catch (error) {
+      console.log(error);
+      res.status(500).send({ message: `An error occurred : ${error.message}` });
+    }
+  },
+
+  /**
+   * Verify Account
+   */
+  async verifyAccount(req, res) {
+    try {
+      const { userId } = req.params;
+      const { verificationCode } = req.body;
+
+      if (!verificationCode) {
+        return res.status(400).json({
+          message: 'Verification code is required',
+          success: false
+        });
+      }
+
+      await verifyEmail(verificationCode, userId, res);
+
+    } catch (error) {
+      console.error('Account verification error:', error);
+      res.status(500).json({
+        message: 'An error occurred during verification',
+        success: false
+      });
+    }
+  },
+
+
   /**
    * Get user profile
    */
@@ -25,6 +197,227 @@ const userController = {
       res.status(500).json({ message: `An error occurred: ${error.message}` });
     }
   },
+
+  /**
+   * Forget Password
+   */
+  async forgotPassword(req, res) {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({
+          message: 'Email is required',
+          success: false
+        });
+      }
+
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          message: 'Please provide a valid email address',
+          success: false
+        });
+      }
+
+      const user = await User.findOne({ email: email.toLowerCase() });
+
+      if (!user) {
+        // Don't reveal whether the email exists or not for security
+        return res.status(200).json({
+          message: 'If an account with that email exists, a password reset code has been sent.',
+          success: true
+        });
+      }
+
+      const result = await sendForgotPasswordEmail(user.email, user);
+
+      if (result.success) {
+        res.status(200).json({
+          message: 'Password reset code sent to your email.',
+          success: true
+        });
+      } else {
+        res.status(500).json({
+          message: 'Failed to send password reset code. Please try again.',
+          success: false
+        });
+      }
+
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      res.status(500).json({
+        message: 'An error occurred while processing your request',
+        success: false
+      });
+    }
+  },
+
+  /**
+   * Resend Verification Email
+   */
+  async resendVerificationEmail(req, res) {
+    try {
+      const { userId } = req.params;
+
+      const user = await User.findById(userId);
+
+      if (!user) {
+        return res.status(404).json({
+          message: "Account not found",
+          success: false
+        });
+      }
+
+      if (user.verified) {
+        return res.status(400).json({
+          message: "Account is already verified",
+          success: false
+        });
+      }
+
+      const emailResult = await sendVerificationEmail(
+        user.email,
+        user,
+        'Verify Your FindSafe Account - Resend',
+        res,
+        'New verification code sent to your email.'
+      );
+
+      if (emailResult.success) {
+        res.status(200).json({
+          message: 'New verification code sent to your email.',
+          success: true
+        });
+      } else {
+        res.status(500).json({
+          message: 'Failed to send verification email. Please try again.',
+          success: false
+        });
+      }
+
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      res.status(500).json({
+        message: 'An error occurred while resending verification',
+        success: false
+      });
+    }
+  },
+
+  /**
+   * Verify Reset OTP
+   */
+  async verifyResetOTP(req, res) {
+    try {
+      const { email, otp } = req.body;
+
+      if (!email || !otp) {
+        return res.status(400).json({
+          message: 'Email and OTP are required',
+          success: false
+        });
+      }
+
+      const result = await verifyPasswordResetOTP(email, otp);
+
+      if (result.success) {
+        res.status(200).json({
+          message: result.message,
+          success: true,
+          resetToken: result.resetToken,
+          userId: result.userId
+        });
+      } else {
+        res.status(400).json({
+          message: result.message,
+          success: false
+        });
+      }
+
+    } catch (error) {
+      console.error('OTP verification error:', error);
+      res.status(500).json({
+        message: 'An error occurred during OTP verification',
+        success: false
+      });
+    }
+  },
+  /**
+   * Reset Password
+   */
+  async resetPassword(req, res) {
+    try {
+      const { userId, resetToken, newPassword } = req.body;
+
+      if (!userId || !resetToken || !newPassword) {
+        return res.status(400).json({
+          message: 'User ID, reset token, and new password are required',
+          success: false
+        });
+      }
+
+      // Password strength validation
+      if (newPassword.length < 6) {
+        return res.status(400).json({
+          message: 'Password must be at least 6 characters long',
+          success: false
+        });
+      }
+
+      const result = await resetPassword(userId, resetToken, newPassword);
+
+      if (result.success) {
+        res.status(200).json({
+          message: result.message,
+          success: true,
+          user: result.user
+        });
+      } else {
+        res.status(400).json({
+          message: result.message,
+          success: false
+        });
+      }
+
+    } catch (error) {
+      console.error('Password reset error:', error);
+      res.status(500).json({
+        message: 'An error occurred while resetting password',
+        success: false
+      });
+    }
+  },
+
+  /**
+   * Logout User
+   */
+  async logout(req, res) {
+    try {
+      req.session.destroy((err) => {
+        if (err) {
+          return res.status(500).json({
+            message: 'Could not log out, please try again',
+            success: false
+          });
+        }
+
+        res.clearCookie('connect.sid'); // Clear session cookie
+        res.status(200).json({
+          message: 'Logged out successfully',
+          success: true
+        });
+      });
+    } catch (error) {
+      console.error('Logout error:', error);
+      res.status(500).json({
+        message: 'An error occurred during logout',
+        success: false
+      });
+    }
+  },
+
 
   /**
    * Update user profile

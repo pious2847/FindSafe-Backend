@@ -13,3 +13,12 @@ module.exports.capitalizeEachWord = function capitalizeEachWord(str) {
     const data = `${userId}-${randomBytes}-${timestamp}`;
     return crypto.createHash('sha256').update(data).digest('hex');
   }
+
+  // Generate JWT Token
+const generateToken = (user) => {
+    return jwt.sign({ user }, process.env.JWT_SECRET || 'Secret_Key', {
+        expiresIn: '7d',
+    });
+};
+
+module.exports.generateToken = generateToken;
