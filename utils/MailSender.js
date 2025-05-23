@@ -215,9 +215,9 @@ const verifyPasswordResetOTP = async (email, otp) => {
  * @param {string} newPassword - The new password.
  * @returns {Object} Response with status and message.
  */
-const resetPassword = async (userId, resetToken, newPassword) => {
+const resetPassword = async (email, resetToken, newPassword) => {
   try {
-    const user = await Users.findById(userId);
+    const user = await Users.findOne({ email: email.toLowerCase() });
     if (!user) {
       return { message: "User not found", success: false };
     }

@@ -21,7 +21,7 @@ router.post('/api/login', userController.login);
 router.post('/api/verify-account/:userId', userController.verifyAccount);
 
 // Resend Account Verification
-router.post('/api/resend-verification/:userId', userController.resendVerificationEmail);
+router.post('/api/resend-verification', userController.resendVerificationEmail);
 
 // Forgot Password - Send OTP
 router.post('/api/forgot-password', userController.forgotPassword);

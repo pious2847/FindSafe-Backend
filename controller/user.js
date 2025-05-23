@@ -130,7 +130,7 @@ const userController = {
 
       // Generate a session token (you can use a library like jsonwebtoken for this)
       const sessionToken = generateSessionToken(user._id);
-      const token = await generateToken(user)
+      const token = generateToken(user)
 
       // Set session variables
       req.session.userId = user._id;
@@ -259,9 +259,9 @@ const userController = {
    */
   async resendVerificationEmail(req, res) {
     try {
-      const { userId } = req.params;
+      const { email } = req.body;
 
-      const user = await User.findById(userId);
+      const user = await User.findOne({ email: email.toLowerCase() });
 
       if (!user) {
         return res.status(404).json({
@@ -349,9 +349,9 @@ const userController = {
    */
   async resetPassword(req, res) {
     try {
-      const { userId, resetToken, newPassword } = req.body;
+      const { email, resetToken, newPassword } = req.body;
 
-      if (!userId || !resetToken || !newPassword) {
+      if (!email || !resetToken || !newPassword) {
         return res.status(400).json({
           message: 'User ID, reset token, and new password are required',
           success: false
@@ -366,7 +366,7 @@ const userController = {
         });
       }
 
-      const result = await resetPassword(userId, resetToken, newPassword);
+      const result = await resetPassword(email, resetToken, newPassword);
 
       if (result.success) {
         res.status(200).json({
