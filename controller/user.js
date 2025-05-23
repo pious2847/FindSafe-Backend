@@ -156,17 +156,16 @@ const userController = {
    */
   async verifyAccount(req, res) {
     try {
-      const { userId } = req.params;
-      const { verificationCode } = req.body;
+      const { otp, email } = req.body;
 
-      if (!verificationCode) {
+      if (!otp || !email) {
         return res.status(400).json({
           message: 'Verification code is required',
           success: false
         });
       }
 
-      await verifyEmail(verificationCode, userId, res);
+      await verifyEmail(otp, email, res);
 
     } catch (error) {
       console.error('Account verification error:', error);

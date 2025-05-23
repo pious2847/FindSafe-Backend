@@ -107,11 +107,17 @@ const sendForgotPasswordEmail = async (email, user) => {
 /**
  * Verifies the email verification code for account verification
  * @param {string} verificationCode - The verification code entered by the user.
- * @param {string} userId - The ID of the user.
+ * @param {string} email - The email address of the user.
  * @param {Object} res - The response object.
  */
-const verifyEmail = async (verificationCode, userId, res) => {
+const verifyEmail = async (verificationCode, email, res) => {
   try {
+    const user = await Users.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found", success: false });
+    }
+
+    const userId = user._id;
     const passwordReset = await PasswordReset.findOne({ 
       userId: userId 
     });
@@ -135,10 +141,6 @@ const verifyEmail = async (verificationCode, userId, res) => {
       return res.status(404).json({ message: "Invalid verification code", success: false });
     }
 
-    const user = await Users.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found", success: false });
-    }
 
     user.verified = true;
     await user.save();
@@ -210,7 +212,7 @@ const verifyPasswordResetOTP = async (email, otp) => {
 
 /**
  * Resets the user's password using the reset token
- * @param {string} userId - The ID of the user.
+ * @param {string} email - The email address of the user.
  * @param {string} resetToken - The reset token.
  * @param {string} newPassword - The new password.
  * @returns {Object} Response with status and message.

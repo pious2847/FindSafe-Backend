@@ -18,7 +18,7 @@ router.post('/api/signup', userController.signup);
 router.post('/api/login', userController.login);
 
 // Verify Account Email
-router.post('/api/verify-account/:userId', userController.verifyAccount);
+router.post('/api/verify-otp', userController.verifyAccount);
 
 // Resend Account Verification
 router.post('/api/resend-verification', userController.resendVerificationEmail);
