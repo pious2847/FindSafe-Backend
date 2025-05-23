@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const PasswordReset = require("../models/utils_models/PasswordReset");
 const Users = require("../models/users");
 const axios = require("axios");
-const { generateOTP } = require("./codesGen");
+const generateOTP = require("./codesGen").generateOTP; // Import the generateOTP function
 const { 
   generateAccountVerification, 
   generatePasswordResetConfirmation, 
@@ -42,7 +42,7 @@ const sendVerificationEmail = async (email, user, subject, res, resMessage) => {
   try {
     await PasswordReset.deleteMany({ userId: user._id });
     const salt = 10;
-    const hashedVerificationCode = await bcrypt.hash(verificationCode, salt);
+    const hashedVerificationCode = await bcrypt.hash(verificationCode.toString(), salt);
 
     const newPasswordReset = new PasswordReset({
       userId: user._id,
@@ -86,7 +86,7 @@ const sendForgotPasswordEmail = async (email, user) => {
     await PasswordReset.deleteMany({ userId: user._id });
     
     const salt = 10;
-    const hashedResetCode = await bcrypt.hash(resetCode, salt);
+    const hashedResetCode = await bcrypt.hash(resetCode.toString(), salt);
 
     const newPasswordReset = new PasswordReset({
       userId: user._id,
@@ -188,7 +188,7 @@ const verifyPasswordResetOTP = async (email, otp) => {
 
     // Generate a temporary token for password reset (valid for 10 minutes)
     const resetToken = generateOTP();
-    const hashedResetToken = await bcrypt.hash(resetToken, 10);
+    const hashedResetToken = await bcrypt.hash(resetToken.toString(), 10);
 
     // Update the password reset record with the token
     passwordReset.verificationCode = hashedResetToken;
