@@ -14,8 +14,9 @@ const analyticsController = {
             const totalDevices = userDevices.length;
 
             // Get connected devices
-            const connectedDevices = getConnectedDevices();
-            const userConnectedDevices = userDevices.filter(device => 
+            const connectedDevicesData = getConnectedDevices();
+            const connectedDevices = connectedDevicesData.devices || [];
+            const userConnectedDevices = userDevices.filter(device =>
                 connectedDevices.some(connected => connected.deviceId === device._id.toString())
             );
             const onlineDevices = userConnectedDevices.length;
@@ -160,7 +161,8 @@ const analyticsController = {
 
             // Get user devices
             const userDevices = await DevicesInfo.find({ user: userId });
-            const connectedDevices = getConnectedDevices();
+            const connectedDevicesData = getConnectedDevices();
+            const connectedDevices = connectedDevicesData.devices || [];
 
             // Calculate uptime (simulate)
             const uptime = Math.random() * 5 + 95; // 95-100%
@@ -192,7 +194,8 @@ const analyticsController = {
             const { userId } = req.params;
 
             const userDevices = await DevicesInfo.find({ user: userId });
-            const connectedDevices = getConnectedDevices();
+            const connectedDevicesData = getConnectedDevices();
+            const connectedDevices = connectedDevicesData.devices || [];
 
             // Group devices by status
             const devicesByStatus = {
