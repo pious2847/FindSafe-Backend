@@ -83,6 +83,7 @@ const locationRouter = require('./Routes/location');
 const devicerouter = require('./Routes/devices');
 const geofenceRouter = require('./Routes/geofence');
 const notificationRouter = require('./Routes/notification');
+const analyticsRouter = require('./Routes/analytics');
 const createRateLimitMiddleware = require('./middleware/ratelimitter');
 
 // measuring the speed of site load
@@ -109,6 +110,7 @@ app.use(locationRouter);
 app.use(devicerouter);
 app.use(geofenceRouter);
 app.use(notificationRouter);
+app.use(analyticsRouter);
 
 // ===============Handling UncaughtExceptions ======================//
 
