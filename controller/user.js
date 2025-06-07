@@ -22,28 +22,28 @@ const userController = {
 
       // Input validation
       if (!username || !email || !password) {
-        return res.status(400).json({ 
-            message: 'Username, email, and password are required',
-            success: false 
+        return res.status(400).json({
+          message: 'Username, email, and password are required',
+          success: false
         });
       }
 
-        // Email format validation
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            return res.status(400).json({ 
-                message: 'Please provide a valid email address',
-                success: false 
-            });
-        }
+      // Email format validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          message: 'Please provide a valid email address',
+          success: false
+        });
+      }
 
-        // Password strength validation
-        if (password.length < 6) {
-            return res.status(400).json({ 
-                message: 'Password must be at least 6 characters long',
-                success: false 
-            });
-        }
+      // Password strength validation
+      if (password.length < 6) {
+        return res.status(400).json({
+          message: 'Password must be at least 6 characters long',
+          success: false
+        });
+      }
 
 
       // Check if user with the same email already exists
@@ -65,34 +65,39 @@ const userController = {
       // Save the new user to the database
       await user.save();
 
+      // remove user password before sending user data 
+      delete user._doc.password;
+      delete user._doc.__v;
+
+
       // Send verification email
       const emailResult = await sendVerificationEmail(
-        user.email, 
-        user, 
+        user.email,
+        user,
         'Verify Your FindSafe Account',
         res,
         'Account created successfully. Verification code sent to your email.'
       );
 
       if (emailResult.success) {
-        res.status(200).json({ 
-            message: 'Account created successfully. Verification code sent to your email.',
-            success: true,
-            userId: user._id
+        res.status(200).json({
+          message: 'Account created successfully. Verification code sent to your email.',
+          success: true,
+          userId: user._id
         });
       } else {
-        res.status(500).json({ 
-            message: 'Account created but failed to send verification email. Please try again.',
-            success: false 
+        res.status(500).json({
+          message: 'Account created but failed to send verification email. Please try again.',
+          success: false
         });
       }
 
 
     } catch (error) {
       console.error('Signup error:', error);
-      res.status(500).json({ 
-          message: `An error occurred: ${error.message}`,
-          success: false 
+      res.status(500).json({
+        message: `An error occurred: ${error.message}`,
+        success: false
       });
 
     }
@@ -106,9 +111,9 @@ const userController = {
 
       // Input validation
       if (!email || !password) {
-        return res.status(400).json({ 
-            message: 'Email and password are required',
-            success: false 
+        return res.status(400).json({
+          message: 'Email and password are required',
+          success: false
         });
       }
 
@@ -127,6 +132,11 @@ const userController = {
       if (!isPasswordValid) {
         return res.status(400).send({ message: 'Invalid password Entered' });
       }
+
+      // remove user password before sending user data 
+      delete user.password;
+      delete user._doc.password;
+      delete user._doc.__v;
 
       // Generate a session token (you can use a library like jsonwebtoken for this)
       const sessionToken = generateSessionToken(user._id);
@@ -189,6 +199,11 @@ const userController = {
       if (!user) {
         return res.status(404).json({ message: 'User not found' });
       }
+
+      // remove user password before sending user data 
+      delete user.password;
+      delete user._doc.password;
+      delete user._doc.__v;
 
       res.status(200).json({ message: '', User: user });
     } catch (error) {
