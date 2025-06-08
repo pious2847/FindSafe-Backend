@@ -2,9 +2,11 @@ const PendingCommands = require("../models/utils_models/awaitingcommands");
 const { sendCommandToDevice } = require("../utils/websocket");
 const DevicesInfo = require("../models/deviceinfo");
 const Location = require("../models/locations");
-const geofenceController = require("./geofence");
+const { checkDeviceGeofences, calculateDistance } = require("./geofence");
 const Geofence = require("../models/geofence");
+const GeofenceHistory = require("../models/geofence_history");
 const notificationService = require("../utils/notification_service");
+const ActivityLogger = require('../utils/activityLogger');
 
 
 const locationController = {
@@ -34,6 +36,14 @@ const locationController = {
             device.curretlocation = newLocation._id;
             device.locationHistory.push(newLocation._id);
             await device.save();
+
+            // Log location update activity
+            await ActivityLogger.logLocationUpdate(
+                device.user,
+                deviceId,
+                device.devicename,
+                { latitude, longitude, timestamp: newLocation.timestamp }
+            );
 
             res.status(201).json({ message: "Location added successfully" });
           } catch (error) {
@@ -87,10 +97,27 @@ const locationController = {
             device.locationHistory.push(device.curretlocation);
             await device.save();
 
+            // Log location update activity
+            await ActivityLogger.logLocationUpdate(
+                device.user,
+                deviceId,
+                device.devicename,
+                { latitude, longitude, timestamp: newLocation.timestamp }
+            );
+
             const anypendingCommand = await PendingCommands.findOne({deviceId: device._id});
             if(anypendingCommand){
-              sendCommandToDevice({deviceId:`${deviceId}`, command:anypendingCommand.command}),
-                await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
+              sendCommandToDevice({deviceId:`${deviceId}`, command:anypendingCommand.command});
+
+              // Log command execution activity
+              await ActivityLogger.logCommandExecuted(
+                device.user,
+                deviceId,
+                device.devicename,
+                anypendingCommand.command
+              );
+
+              await PendingCommands.findOneAndDelete({_id: anypendingCommand._id});
             }
 
             // Check if device is within any geofences
@@ -99,7 +126,7 @@ const locationController = {
               const previouslyTriggeredGeofences = global.triggeredGeofences?.[deviceId] || [];
 
               // Check current geofences
-              const triggeredGeofences = await geofenceController.checkDeviceGeofences(deviceId, latitude, longitude);
+              const triggeredGeofences = await checkDeviceGeofences(deviceId, latitude, longitude);
 
               // Store current triggered geofences
               if (!global.triggeredGeofences) {
@@ -123,6 +150,35 @@ const locationController = {
                     // Get device info for notification
                     const deviceInfo = await DevicesInfo.findById(deviceId).populate('user');
                     if (deviceInfo && deviceInfo.user) {
+                      // Calculate distance from geofence center
+                      const distance = calculateDistance(
+                        latitude,
+                        longitude,
+                        geofence.center.latitude,
+                        geofence.center.longitude
+                      );
+
+                      // Log geofence entry in history
+                      const historyEntry = new GeofenceHistory({
+                        userId: deviceInfo.user._id,
+                        deviceId: deviceId,
+                        geofenceId: geofence._id,
+                        eventType: 'entered',
+                        location: { latitude, longitude },
+                        distance: distance,
+                        timestamp: new Date()
+                      });
+                      await historyEntry.save();
+
+                      // Log geofence entry activity
+                      await ActivityLogger.logGeofenceEvent(
+                        deviceInfo.user._id,
+                        deviceId,
+                        deviceInfo.devicename,
+                        geofence.name,
+                        'entered'
+                      );
+
                       // Send push notification for geofence entry
                       await notificationService.sendGeofenceNotification(
                         deviceInfo.user._id,
@@ -146,6 +202,47 @@ const locationController = {
                       // Get device info for notification
                       const deviceInfo = await DevicesInfo.findById(deviceId).populate('user');
                       if (deviceInfo && deviceInfo.user) {
+                        // Calculate distance from geofence center
+                        const distance = calculateDistance(
+                          latitude,
+                          longitude,
+                          geofence.center.latitude,
+                          geofence.center.longitude
+                        );
+
+                        // Calculate dwell time
+                        const entryRecord = await GeofenceHistory.findOne({
+                          userId: deviceInfo.user._id,
+                          deviceId: deviceId,
+                          geofenceId: geofence._id,
+                          eventType: 'entered'
+                        }).sort({ timestamp: -1 });
+
+                        const dwellTime = entryRecord ?
+                          new Date().getTime() - entryRecord.timestamp.getTime() : 0;
+
+                        // Log geofence exit in history
+                        const historyExit = new GeofenceHistory({
+                          userId: deviceInfo.user._id,
+                          deviceId: deviceId,
+                          geofenceId: geofence._id,
+                          eventType: 'exited',
+                          location: { latitude, longitude },
+                          distance: distance,
+                          dwellTime: dwellTime,
+                          timestamp: new Date()
+                        });
+                        await historyExit.save();
+
+                        // Log geofence exit activity
+                        await ActivityLogger.logGeofenceEvent(
+                          deviceInfo.user._id,
+                          deviceId,
+                          deviceInfo.devicename,
+                          geofence.name,
+                          'exited'
+                        );
+
                         // Send push notification for geofence exit
                         await notificationService.sendGeofenceNotification(
                           deviceInfo.user._id,
@@ -171,5 +268,7 @@ const locationController = {
           }
     }
 }
+
+
 
 module.exports = locationController

@@ -6,6 +6,7 @@ const { sendEmail } = require('../utils/MailSender');
 const { sendCommandToDevice, getConnectedDevices } = require('../utils/websocket');
 const { generateLostModeNotification, generateDeviceFoundNotification } = require("../utils/messages");
 const PendingCommands = require("../models/utils_models/awaitingcommands");
+const ActivityLogger = require('../utils/activityLogger');
 
 
 const deviceController = {
@@ -99,9 +100,12 @@ const deviceController = {
 
             user.save();
 
+            // Log device registration activity
+            await ActivityLogger.logDeviceAdded(userId, device._id, devicename);
+
             res
                 .status(200)
-                .json({ message: "Location added successfully", deviceId: device._id });
+                .json({ message: "Device registered successfully", deviceId: device._id });
         } catch (error) {
             res.status(500).json({ error: "An error occurred: " + error.message });
         }
@@ -149,9 +153,15 @@ const deviceController = {
                 });
             }
 
+            // Store old mode for activity logging
+            const oldMode = device.mode;
+
             // Update device mode
             device.mode = mode;
             await device.save();
+
+            // Log device mode change activity
+            await ActivityLogger.logDeviceModeChanged(userId, deviceId, device.devicename, oldMode, mode);
 
             // Handle email notifications
             try {
@@ -266,8 +276,11 @@ const deviceController = {
             if (!device) {
                 res.send(404).json({ message: "Device not found" });
             }
+            // Log device removal activity before deletion
+            await ActivityLogger.logDeviceRemoved(device.user, deviceId, device.devicename);
+
             await DevicesInfo.findByIdAndDelete(deviceId);
-            res.status(200).json({ message: "Device deleted Sucessfully" });
+            res.status(200).json({ message: "Device deleted Successfully" });
         } catch (error) {
             res
                 .status(500)
@@ -277,10 +290,22 @@ const deviceController = {
     async triggerAlarm(req, res) {
         const { deviceId } = req.params;
 
-        if (sendCommandToDevice({deviceId:`${deviceId}`, command:'play_alarm'})) {
-            res.json({ success: true, message: 'Alarm command sent successfully' });
-        } else {
-            res.status(404).json({ success: false, message: 'Device not found or not connected' });
+        try {
+            const device = await DevicesInfo.findById(deviceId);
+            if (!device) {
+                return res.status(404).json({ success: false, message: 'Device not found' });
+            }
+
+            if (sendCommandToDevice({deviceId:`${deviceId}`, command:'play_alarm'})) {
+                // Log command sent activity
+                await ActivityLogger.logCommandSent(device.user, deviceId, device.devicename, 'play_alarm');
+
+                res.json({ success: true, message: 'Alarm command sent successfully' });
+            } else {
+                res.status(404).json({ success: false, message: 'Device not found or not connected' });
+            }
+        } catch (error) {
+            res.status(500).json({ success: false, message: 'Error sending alarm command: ' + error.message });
         }
     },
     async getConnectedDevice(req, res) {

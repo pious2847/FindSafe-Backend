@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const { cloudinary } = require('../utils/cloudinary');
 const { sendVerificationEmail, sendForgotPasswordEmail, verifyEmail, verifyPasswordResetOTP, resetPassword } = require('../utils/MailSender');
 const { generateSessionToken } = require('../utils/codesGen');
+const ActivityLogger = require('../utils/activityLogger');
 
 const generateToken = (user) => {
   return jwt.sign({ user }, process.env.JWT_SECRET || 'Secret_Key', {
@@ -146,6 +147,10 @@ const userController = {
       req.session.userId = user._id;
       req.session.isLoggedIn = true;
       req.session.token = sessionToken;
+
+      // Log user login activity
+      const clientIP = req.ip || req.connection.remoteAddress || 'Unknown';
+      await ActivityLogger.logUserLogin(user._id, user.email, clientIP);
 
       res.status(200).send({
         success: true,
@@ -409,12 +414,26 @@ const userController = {
    */
   async logout(req, res) {
     try {
-      req.session.destroy((err) => {
+      const userId = req.session.userId;
+
+      req.session.destroy(async (err) => {
         if (err) {
           return res.status(500).json({
             message: 'Could not log out, please try again',
             success: false
           });
+        }
+
+        // Log user logout activity if we have userId
+        if (userId) {
+          try {
+            const user = await User.findById(userId);
+            if (user) {
+              await ActivityLogger.logUserLogout(userId, user.email);
+            }
+          } catch (logError) {
+            console.error('Error logging logout activity:', logError);
+          }
         }
 
         res.clearCookie('connect.sid'); // Clear session cookie
@@ -471,6 +490,9 @@ const userController = {
       const token = jwt.sign({ user }, process.env.JWT_SECRET || 'Secret_Key', {
         expiresIn: '7d',
       });
+
+      // Log profile update activity
+      await ActivityLogger.logProfileUpdated(userId, user.email, Object.keys(updateFields));
 
       res.status(200).json({
         message: 'User updated successfully',
