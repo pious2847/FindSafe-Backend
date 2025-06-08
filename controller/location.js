@@ -87,14 +87,18 @@ const locationController = {
             const newLocation = new Location({ latitude, longitude });
             await newLocation.save();
 
-            // Update the device's current location and push the previous location to the history
-            device.curretlocation = newLocation._id;
-            const  currentlochiscount = device.locationHistory.length;
+            // Push the current location to history before updating (if it exists)
+            if (device.curretlocation) {
+              const currentlochiscount = device.locationHistory.length;
 
-            if( currentlochiscount >= 30){
-             device.locationHistory.shift();
+              if (currentlochiscount >= 30) {
+                device.locationHistory.shift();
+              }
+              device.locationHistory.push(device.curretlocation);
             }
-            device.locationHistory.push(device.curretlocation);
+
+            // Update the device's current location
+            device.curretlocation = newLocation._id;
             await device.save();
 
             // Log location update activity
